@@ -48,7 +48,7 @@ export function TodoList({ todos, setTodos }) {
             }
         }
         loadTodos()
-    }, [isLoaded]);
+    }, [isLoaded, session, setTodos]);
 
     // if loading, just show basic message
     if (loading) {
@@ -69,7 +69,7 @@ export function TodoList({ todos, setTodos }) {
             </ol>
             </div>
         ) : (
-            <div className={styles.label}>You don't have any todos!</div>
+            <div className={styles.label}>{"You don't have any todos!"}</div>
         )}
         </>
     ) : (
