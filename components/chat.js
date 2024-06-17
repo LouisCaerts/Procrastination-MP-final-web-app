@@ -18,7 +18,7 @@ export const addChatEventListeners = () => {
           const data = await response.json();
     
           let gptResponse = document.getElementById('gptResponse');
-          console.log(data.message.content);
+          sendMessage(data.message.content, lastSetInput, lastSetMessages, lastMessages, true);
         } else {
           console.error('Error:', response.statusText);
         }
@@ -28,9 +28,25 @@ export const addChatEventListeners = () => {
     });
 }
 
-export const sendMessage = (input, setInput, setMessages, messages) => {
-  if (input.trim() === '') return;
+let lastInput = 0;
+let lastSetInput = 0;
+let lastMessages = 0;
+let lastSetMessages = 0;
 
-  setMessages([...messages, { user: 'You', text: input }]);
-  setInput('');
+export const sendMessage = (input, setInput, setMessages, messages, gpt=false) => {
+  if (!gpt && input.trim() === '') {
+    return;
+  }
+
+  if (!gpt) {
+    lastInput = input;
+    lastSetInput = setInput;
+    lastMessages = messages;
+    lastSetMessages = setMessages;
+
+    setMessages([...messages, { user: 'You', text: input }]);
+    setInput('');
+  } else {
+    setMessages([...messages, { user: 'Bot', text: input }]);
+  }
 };
