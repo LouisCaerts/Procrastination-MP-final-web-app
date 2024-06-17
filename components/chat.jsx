@@ -16,7 +16,7 @@ export function Chat() {
     ]);
     const [input, setInput] = useState('');
 
-    const handleSendMessage = async (event) => {
+    const handleSendMessage = (event) => {
       event.preventDefault(); // Prevent the default form submission behavior
       sendMessage(input, setInput, setMessages, messages);
       const response = sendQuery(input);
