@@ -1,7 +1,7 @@
 "use client";
 import { useAuth, useUser, UserButton, SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/nextjs'
 import React, { useState, useEffect } from 'react';
-import { sendMessage, addChatEventListeners } from './chat.js'
+import sendQuery from './chat.js'
 
 const explainer = `
 This page contains the chat functionality of the web app.
@@ -16,14 +16,22 @@ export function Chat() {
     ]);
     const [input, setInput] = useState('');
 
-    useEffect(() => {
-      const cleanup = addChatEventListeners(sendMessage, input, setInput, setMessages, messages);
-      return cleanup; // Cleanup event listeners on unmount
-    }, [input, setInput, setMessages, messages]);
-
-    const handleSendMessage = (event) => {
+    const handleSendMessage = async (event) => {
       event.preventDefault(); // Prevent the default form submission behavior
       sendMessage(input, setInput, setMessages, messages);
+      const response = sendQuery(input);
+      sendMessage(response, setInput, setMessages, messages);
+    };
+
+    const sendMessage = (gpt=false) => {
+      if (input.trim() === '') return;
+    
+      if (!gpt) {
+        setMessages([...messages, { user: 'You', text: input }]);
+        setInput('');
+      } else {
+        setMessages([...messages, { user: 'Bot', text: input }]);
+      }
     };
 
     return (
