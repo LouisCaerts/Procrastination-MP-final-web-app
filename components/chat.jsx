@@ -41,10 +41,12 @@ export function Chat() {
             <form className="chat-input" id="gptForm" onSubmit={handleSendMessage}>
               <input
                 type="text"
-                id="chat-input"
+                id="gptInput"
+                name="gptInput"
                 placeholder="Type your message..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                required
               />
               <button type="submit">Send</button>
             </form>

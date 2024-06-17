@@ -1,6 +1,5 @@
 export const addChatEventListeners = () => {
   document.getElementById('gptForm').addEventListener('submit', async function(event) {
-      console.log("YAAAS")
       event.preventDefault(); // Prevent default form submission
     
       const formData = new FormData(this); // Get form data
