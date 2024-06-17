@@ -1,6 +1,7 @@
 "use client";
 import { useAuth, useUser, UserButton, SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/nextjs'
 import React, { useState, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import sendQuery from './chat.js'
 
 const explainer = `
@@ -16,21 +17,24 @@ export function Chat() {
     ]);
     const [input, setInput] = useState('');
 
-    const handleSendMessage = (event) => {
+    const handleSendMessage = async (event) => {
       event.preventDefault(); // Prevent the default form submission behavior
-      sendMessage(false, input);
+      flushSync(() => {
+        sendMessage(false, input);
+      });
       const response = sendQuery(input);
       sendMessage(true, response);
     };
 
-    const sendMessage = (gpt=false, response=input) => {
+    const sendMessage = async (gpt=false, response=input) => {
       if (input.trim() === '') return;
     
       if (!gpt) {
-        setMessages([...messages, { user: 'You', text: input }]);
+        setMessages(messages => [...messages, { user: 'You', text: input }]);
         setInput('');
       } else {
-        setMessages([...messages, { user: 'Bot', text: response }]);
+        setMessages(messages => [...messages, { user: 'Bot', text: response }]);
+        console.log(messages)
       }
     };
 
