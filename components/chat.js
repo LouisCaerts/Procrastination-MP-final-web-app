@@ -18,7 +18,7 @@ export const addChatEventListeners = () => {
           const data = await response.json();
     
           let gptResponse = document.getElementById('gptResponse');
-          gptResponse.innerHTML = data.message.content;
+          console.log(data.message.content);
         } else {
           console.error('Error:', response.statusText);
         }
