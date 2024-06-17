@@ -18,19 +18,19 @@ export function Chat() {
 
     const handleSendMessage = (event) => {
       event.preventDefault(); // Prevent the default form submission behavior
-      sendMessage(input, setInput, setMessages, messages);
+      sendMessage(false);
       const response = sendQuery(input);
-      sendMessage(response, setInput, setMessages, messages);
+      sendMessage(true, response);
     };
 
-    const sendMessage = (gpt=false) => {
+    const sendMessage = (gpt=false, response=input) => {
       if (input.trim() === '') return;
     
       if (!gpt) {
         setMessages([...messages, { user: 'You', text: input }]);
         setInput('');
       } else {
-        setMessages([...messages, { user: 'Bot', text: input }]);
+        setMessages([...messages, { user: 'Bot', text: response }]);
       }
     };
 
