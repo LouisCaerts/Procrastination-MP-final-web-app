@@ -18,7 +18,7 @@ export function Chat() {
 
     const handleSendMessage = (event) => {
       event.preventDefault(); // Prevent the default form submission behavior
-      sendMessage(false);
+      sendMessage(false, input);
       const response = sendQuery(input);
       sendMessage(true, response);
     };
