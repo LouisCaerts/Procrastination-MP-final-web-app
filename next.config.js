@@ -21,21 +21,7 @@ const withPWA = require('next-pwa')({
         options: {
           cacheName: 'assets',
         },
-      },
-      {
-        urlPattern: new RegExp('https://fonts.(?:googleapis|gstatic).com/(.*)'),
-        handler: 'CacheFirst',
-        options: {
-          cacheName: 'google-fonts',
-          plugins: [
-            {
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          ],
-        },
-      },
+      }
     ],
 });
 
