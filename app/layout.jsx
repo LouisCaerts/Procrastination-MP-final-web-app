@@ -15,6 +15,8 @@ export default function RootLayout({ children }) {
         <ClerkProvider>
             <html lang="en" data-theme="lofi">
                 <head>
+                    <link rel="manifest" href="/manifest.json" />
+                    <meta name="theme-color" content="#000000" />
                     <link rel="icon" href="/favicon.svg" sizes="any" />
                 </head>
                 <body className="antialiased text-white bg-blue-900">
