@@ -4,15 +4,12 @@ const Openai = new openai();
 
 export async function handler(event) {
   const requestBody = JSON.parse(event.body);
+  console.log(requestBody.query);
   const query = requestBody.query;
   
   // Your existing code to interact with OpenAI API
   const completion = await Openai.chat.completions.create({
-    messages: [
-      { role: "system", content: "You are a helpful assistant." },
-      { role: "system", content: "You start each response with 'Bonjour!'." },
-      { role: "user", content: query}
-    ],
+    messages: query,
     model: "gpt-3.5-turbo",
   });
 
@@ -23,5 +20,7 @@ export async function handler(event) {
   };
 
   // Return the response
+  // console.log("---------------------------------------");
+  // console.log(response);
   return response;
 }
