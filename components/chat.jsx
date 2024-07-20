@@ -12,29 +12,43 @@ Users must be logged in in order to access the core of the app.
 export function Chat() {
     const { isLoaded, isSignedIn, user } = useUser();
     const [messages, setMessages] = useState([
-      { user: 'User', text: 'Hello!' },
-      { user: 'Bot', text: 'Hi there! How can I assist you today?' }
+      { role: 'user', content: 'Hello!' },
+      { role: 'assistant', content: 'Hi there! How can I assist you today?' }
     ]);
     const [input, setInput] = useState('');
+    const [readyToSend, setReadyToSend] = useState(false);
+
+  useEffect(() => {
+    if (readyToSend) {
+      console.log(messages);
+      const response = sendQuery(messages);
+      response.then(data => sendMessage(true, data));
+      setReadyToSend(false); // Reset the flag
+    }
+  }, [messages, readyToSend]);
+
+    /*useEffect(() => {
+      // Log the messages whenever they change
+      console.log(messages);
+    }, [messages]);*/
 
     const handleSendMessage = async (event) => {
       event.preventDefault(); // Prevent the default form submission behavior
       flushSync(() => {
         sendMessage(false, input);
       });
-      const response = sendQuery(input);
-      sendMessage(true, response);
+      setReadyToSend(true);
     };
 
     const sendMessage = async (gpt=false, response=input) => {
-      if (input.trim() === '') return;
+      console.log(typeof response)
+      if (JSON.stringify(response).trim() === '') return;
     
       if (!gpt) {
-        setMessages(messages => [...messages, { user: 'You', text: input }]);
+        setMessages(messages => [...messages, { role: 'user', content: response }]);
         setInput('');
       } else {
-        setMessages(messages => [...messages, { user: 'Bot', text: response }]);
-        console.log(messages)
+        setMessages(messages => [...messages, { role: 'assistant', content: response }]);
       }
     };
 
@@ -45,8 +59,8 @@ export function Chat() {
             <div className="chat-window" id="chat-window">
               {messages.map((msg, index) => (
                 <div key={index} className="message">
-                  <span className="user">{msg.user}:</span>
-                  <span className="text">{msg.text}</span>
+                  <span className="user">{msg.role}:</span>
+                  <span className="text">{msg.content}</span>
                 </div>
               ))}
             </div>
