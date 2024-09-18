@@ -20,9 +20,9 @@ export function Chat() {
     const [finalAnswer, setFinalAnswer] = useState("none");
     const [loading, setLoading] = useState(true);
     const [loadingFailed, setLoadingFailed] = useState(false);
+    const [promptSent, setPromptSent] = useState(false);
     const [messages, setMessages] = useState([]);
     const router = useRouter();
-    var promptSent = false;
 
     const [showExitModal, setShowExitModal] = useState(false);
     const handleShowExitModal = () => setShowExitModal(true);
@@ -40,7 +40,7 @@ export function Chat() {
                             All you have to do is greet the user, repeat their final result, and explain what it could mean in the context of reasons for procrastination.\
                             Finally, just invite them to give their own thoughts."
             sendMessage(false, prompt, true);
-            promptSent = true;
+            setPromptSent(true);
             setReadyToSend(true);
             setLoadingFailed(false);
         }
