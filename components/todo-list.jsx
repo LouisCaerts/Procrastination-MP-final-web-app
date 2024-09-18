@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useSession, useAuth } from '@clerk/nextjs'
 import { createClient } from '@supabase/supabase-js'
-import styles from '../styles/globals.css';
 
 const supabaseClient = async (supabaseAccessToken) => {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_KEY, {
@@ -52,7 +51,7 @@ export function TodoList({ todos, setTodos }) {
 
     // if loading, just show basic message
     if (loading) {
-        return <div className={styles.container}>Loading...</div>
+        return <div className="">Loading...</div>
     }
 
     // display all the todos
@@ -61,7 +60,7 @@ export function TodoList({ todos, setTodos }) {
         {isLoaded ? (
           <>
         {todos?.length > 0 ? (
-            <div className={styles.todoList}>
+            <div className="">
             <ol>
                 {todos.map((todo) => (
                 <li key={todo.id}>{todo.title}</li>
@@ -69,7 +68,7 @@ export function TodoList({ todos, setTodos }) {
             </ol>
             </div>
         ) : (
-            <div className={styles.label}>{"You don't have any todos!"}</div>
+            <div className="">{"You don't have any todos!"}</div>
         )}
         </>
     ) : (

@@ -1,0 +1,164 @@
+:root {
+    --custom-black:rgb(51, 51, 68);
+}
+
+.custom-title {
+    text-align: center;
+    font-size: clamp(10px, 5vw, 100px);
+    font-weight: bolder;
+}
+
+.custom-subtitle {
+    text-align: center;
+    font-size: clamp(15px, 2vw, 60px);
+}
+
+.custom-subsubtitle {
+    text-align: center;
+    font-size: clamp(15px, 1.5vw, 50px);
+    font-weight: light;
+}
+
+.custom-button {
+    min-width: 20%;
+    border: 1px solid var(--custom-black);
+    padding: 5px;
+    margin: 5px;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.custom-button-big {
+    min-width: 20%;
+    border: 2px solid var(--custom-black);
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 40px;
+    padding-right: 40px;
+    text-align: center;
+    background-color: var(--custom-black);
+    color: white;
+    font-weight: bolder;
+    font-size: x-large;
+    border-radius: 10px;
+}
+
+.custom-button-small {
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, lightgray 30%, lightgray 70%, rgba(255, 255, 255, 0) 100%);
+    border: none;
+    padding: 5px;
+    margin: 5px;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.custom-button-small:hover {
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(211, 211, 211, 0.5) 30%, rgba(211, 211, 211, 0.5) 70%, rgba(255, 255, 255, 0) 100%);
+}
+
+.custom-button-invisible {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    width: auto;
+    height: auto;
+    display: inline-flex;
+}
+
+.custom-button-invisible:focus {
+  outline: none;
+}
+
+.custom-icon-normal {
+  font-size: 24px; /* Adjust this to control the size of the icon */
+}
+
+.horizontal {
+    display: flex;
+    justify-content: center;
+}
+
+.centered {
+    display: block;
+    margin: 0 auto;
+}
+
+.inverted-black-white {
+    background-color: var(--custom-black);
+    color: white;
+}
+
+.fill-page {
+    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+}
+
+.custom-vertical-flex {
+    display: flex;
+    flex-direction: column;
+}
+
+.custom-grow {
+    display: flex;
+    flex: 1;
+    max-height: 100%;
+}
+
+.no-resize {
+    resize: none;
+}
+
+.custom-message-user {
+    background-color: rgb(232, 232, 232);
+    padding: 5px;
+    margin-top: 10px;
+    max-width: 80%;
+    border-radius: 5px;
+    align-self: flex-end;
+}
+
+.custom-message-assistant {
+    background-color: rgb(217, 217, 217);
+    padding: 5px;
+    margin-top: 10px;
+    max-width: 80%;
+    border-radius: 5px;
+    align-self: flex-start;
+}
+
+.custom-vertical-overflow-scroll {
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.custom-link-text {
+    text-decoration: none; /* Removes underline from all links */
+}
+
+/*---------------------------------------------------------------------------*/
+
+.custom-question {
+    opacity: 1;
+    transition: opacity 1.0s ease-in-out;
+}
+  
+.custom-question.fade-out {
+    opacity: 0;
+}
+  
+.custom-question.fade-in {
+    opacity: 0;   /* Start from invisible */
+    transition: opacity 1.0s ease-in-out;
+    animation: fadeIn 1.0s forwards;  /* Fade-in animation */
+}
+  
+@keyframes fadeIn {
+    to {
+      opacity: 1; /* Fade back to visible */
+    }
+}
+
+/*---------------------------------------------------------------------------*/

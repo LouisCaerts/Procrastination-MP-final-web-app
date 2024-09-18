@@ -34,3 +34,7 @@ a {
 .btn:disabled {
     @apply text-neutral-400 bg-neutral-700;
 }
+
+input {
+    color: black; /* Change this to your desired color */
+  }

@@ -22,13 +22,11 @@ const supabaseClient = async (supabaseAccessToken) => {
 }
 
 export default function Page() {
-    
     return (
-        <main className="flex flex-col gap-8 sm:gap-16">
-            <section className="flex flex-col items-start gap-3 sm:gap-4">
-                <h1 className="mb-0">Authentication</h1>
-                <p className="text-lg">{"Let's get you logged in!"}</p>
-                <Authentication></Authentication>
+        <main className="">
+            <section className="">
+                <h1>Authentication</h1>
+                <Authentication />
                 <SignedIn>
                     <p>You are signed in! Here is your todo list.</p>
                     <TodoListCombo />

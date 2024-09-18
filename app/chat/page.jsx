@@ -1,7 +1,6 @@
 import { Chat } from 'components/chat.jsx'
 import { createClient } from '@supabase/supabase-js'
 import { SignedIn, SignedOut } from '@clerk/nextjs'
-import '../../styles/chat.css';
 
 
 export const metadata = {
@@ -23,12 +22,9 @@ const supabaseClient = async (supabaseAccessToken) => {
 export default function Page() {
     
     return (
-        <main className="flex flex-col gap-8 sm:gap-16 grow">
-            <section className="flex flex-col items-start gap-3 sm:gap-4 grow">
-                <h1 className="mb-0">Chat</h1>
-                <p className="text-lg">{"Let's chat!"}</p>
+        <main className="custom-grow">
+            <section className="custom-grow">
                 <SignedIn>
-                    <p>You are signed in! Here is the chat.</p>
                     <Chat />
                 </SignedIn>
                 <SignedOut>
