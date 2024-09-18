@@ -13,7 +13,7 @@ export function Home() {
 
                 <div className="d-flex flex-column text-center justify-content-center col">
                     <h2 className=''>Need help getting started?</h2>
-                    <h2 className=''>Find out what's holding you back!</h2>
+                    <h2 className=''>Find out what&apos;s holding you back!</h2>
                     <br />
                     <Link href="/identify" className="custom-link-text" >
                         <button className="custom-button-big centered">I am procrastinating!</button>

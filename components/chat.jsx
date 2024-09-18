@@ -21,50 +21,13 @@ export function Chat() {
     const [loading, setLoading] = useState(true);
     const [loadingFailed, setLoadingFailed] = useState(false);
     const [promptSent, setPromptSent] = useState(false);
+    const [resetting, setResetting] = useState(false);
     const [messages, setMessages] = useState([]);
     const router = useRouter();
 
     const [showExitModal, setShowExitModal] = useState(false);
     const handleShowExitModal = () => setShowExitModal(true);
     const handleCloseExitModal = () => setShowExitModal(false);
-
-    useEffect(() => {
-        if (chatHistory && chatHistory.value && Array.isArray(chatHistory.value) && chatHistory.value.length > 0) {
-            setMessages(messages => chatHistory.value);
-            setLoadingFailed(false);
-        } 
-        else if (identifyResult && identifyResult.value && identifyResult.value != "none" && !promptSent) {
-            setFinalAnswer(identifyResult);
-            const prompt = "You are about to chat to a user and this message is just so you understand the context and will not be displayed to that user.\
-                            The user took a quiz and their final result was \"" + identifyResult.value + "\".\
-                            All you have to do is greet the user, repeat their final result, and explain what it could mean in the context of reasons for procrastination.\
-                            Finally, just invite them to give their own thoughts."
-            sendMessage(false, prompt, true);
-            setPromptSent(true);
-            setReadyToSend(true);
-            setLoadingFailed(false);
-        }
-        else {
-            setLoadingFailed(true);
-        }
-        setLoading(false);
-    }, [chatHistory, identifyResult]);
-
-    useEffect(() => {
-        if (readyToSend) {
-            const response = sendQuery(messages.slice().reverse());
-            response.then(data => sendMessage(true, data));
-            setReadyToSend(false); // Reset the flag
-        }
-    }, [readyToSend]);
-
-    const handleSendMessage = async (event) => {
-      event.preventDefault(); // Prevent the default form submission behavior
-      flushSync(() => {
-        sendMessage(false, input);
-      });
-      setReadyToSend(true);
-    };
 
     const sendMessage = async (gpt=false, response=input, isPrompt=false) => {
       if (JSON.stringify(response).trim() === '') return;
@@ -83,12 +46,51 @@ export function Chat() {
       
     };
 
+    const handleSendMessage = async (event) => {
+      event.preventDefault(); // Prevent the default form submission behavior
+      flushSync(() => {
+        sendMessage(false, input);
+      });
+      setReadyToSend(true);
+    };
+
     const handleReset = () => {
+        setResetting(true)
         setChatHistory({ value: [] });
         setIdentifyResult({ value: "none" });
         setShowExitModal(true);
         router.push('/');
     };
+
+    useEffect(() => {
+        if (chatHistory && chatHistory.value && Array.isArray(chatHistory.value) && chatHistory.value.length > 0) {
+            setMessages(messages => chatHistory.value);
+            setLoadingFailed(false);
+        } 
+        else if (identifyResult && identifyResult.value && identifyResult.value != "none" && !promptSent) {
+            setFinalAnswer(identifyResult);
+            const prompt = "You are about to chat to a user and this message is just so you understand the context and will not be displayed to that user.\
+                            The user took a quiz and their final result was \"" + identifyResult.value + "\".\
+                            All you have to do is greet the user, repeat their final result, and explain what it could mean in the context of reasons for procrastination.\
+                            Finally, just invite them to give their own thoughts."
+            sendMessage(false, prompt, true);
+            setPromptSent(true);
+            setReadyToSend(true);
+            setLoadingFailed(false);
+        }
+        else if (!resetting) {
+            setLoadingFailed(true);
+        }
+        setLoading(false);
+    }, [chatHistory, identifyResult, promptSent, resetting, sendMessage]);
+
+    useEffect(() => {
+        if (readyToSend) {
+            const response = sendQuery(messages.slice().reverse());
+            response.then(data => {if (data.length == 0) { setLoadingFailed(true); } else { sendMessage(true, data) }});
+            setReadyToSend(false); // Reset the flag
+        }
+    }, [readyToSend, messages, sendMessage]);
 
     if (loadingFailed) {
         return (

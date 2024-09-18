@@ -111,8 +111,8 @@ export function Identify() {
                     ) : (
                         <>
                             <h2>Thank you for completing the questionnaire!</h2>
-                            <p>You're final answer is: {finalAnswer}</p>
-                            <button className="custom-button-big centered" onClick={handleNavigate}>Let's talk about it!</button>
+                            <p>You&apos;re final answer is: {finalAnswer}</p>
+                            <button className="custom-button-big centered" onClick={handleNavigate}>Let&apos;s talk about it!</button>
                         </>
                     )}
                 </div>
