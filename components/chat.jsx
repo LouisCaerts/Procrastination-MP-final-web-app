@@ -6,6 +6,7 @@ import sendQuery from './chat.js'
 import Link from 'next/link';
 import { useData } from './data-context.js';
 import { useRouter } from 'next/navigation';
+import prompts from 'data/prompts.json';
 
 const explainer = `
 This page contains the chat functionality of the web app.
@@ -67,12 +68,9 @@ export function Chat() {
             setMessages(messages => chatHistory.value);
             setLoadingFailed(false);
         } 
-        else if (identifyResult && identifyResult.value && identifyResult.value != "none" && !promptSent) {
+        else if (identifyResult && identifyResult.value && identifyResult.value != "None" && !promptSent) {
             setFinalAnswer(identifyResult);
-            const prompt = "You are about to chat to a user and this message is just so you understand the context and will not be displayed to that user.\
-                            The user took a quiz and their final result was \"" + identifyResult.value + "\".\
-                            All you have to do is greet the user, repeat their final result, and explain what it could mean in the context of reasons for procrastination.\
-                            Finally, just invite them to give their own thoughts."
+            const prompt = prompts[identifyResult.value] || "None";
             sendMessage(false, prompt, true);
             setPromptSent(true);
             setReadyToSend(true);
@@ -118,8 +116,8 @@ export function Chat() {
       <div className="d-flex flex-row w-100 h-100 py-4 px-4" suppressHydrationWarning>
         <div className="d-flex flex-column col">
           <div className="ps-2">
-            <button className="custom-button-invisible" type="button" data-bs-toggle="modal" data-bs-target="#exitModal">
-                <i className="bi bi-stop-circle custom-icon-normal align-self-start"></i>
+            <button className="btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#exitModal">
+              <i className="bi bi-stop-circle align-self-start"></i> End Conversation
             </button>
           </div>
         </div>
