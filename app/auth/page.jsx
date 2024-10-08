@@ -32,7 +32,7 @@ export default function Page() {
                     <TodoListCombo />
                 </SignedIn>
                 <SignedOut>
-                    <p>Please Sign in to see your todo list.</p>
+                    <p>Signed out. Please return to the <a href="https://concrastination.netlify.app/">home page</a>.</p>
                 </SignedOut>
             </section>
         </main>

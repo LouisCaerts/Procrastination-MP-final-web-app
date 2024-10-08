@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useData } from './data-context.js';
 import { useRouter } from 'next/navigation';
 import prompts from 'data/prompts.json';
+import { createSupabaseClientWithClerk } from './supabase';
 
 const explainer = `
 This page contains the chat functionality of the web app.
@@ -14,10 +15,13 @@ Users must be logged in in order to access the core of the app.
 `;
 
 export function Chat() {
+    // Supabase client
+    const supabaseClient = createSupabaseClientWithClerk();
+
     const { isLoaded, isSignedIn, user } = useUser();
     const [input, setInput] = useState('');
     const [readyToSend, setReadyToSend] = useState(false);
-    const { chatHistory, setChatHistory, identifyResult, setIdentifyResult } = useData();
+    const { chatHistory, setChatHistory, identifyResult, setIdentifyResult, identifyId, setIdentifyId } = useData();
     const [finalAnswer, setFinalAnswer] = useState("none");
     const [loading, setLoading] = useState(true);
     const [loadingFailed, setLoadingFailed] = useState(false);
@@ -58,12 +62,23 @@ export function Chat() {
     const handleReset = () => {
         setResetting(true)
         setChatHistory({ value: [] });
-        setIdentifyResult({ value: "none" });
+        setIdentifyResult({ value: "None" });
+        setIdentifyId({ value: "null" });
         setShowExitModal(true);
         router.push('/');
     };
 
+    async function loadLastIdentification() {
+      const { data, error } = await supabaseClient
+      .from('identification')
+      .select()
+      .order('created_at', { ascending: false }) // Order by created_at in descending order
+      .limit(1); // Limit to 1 result
+      if (!error) console.log(data)
+    }
+
     useEffect(() => {
+        //if (identifyId && identifyId.value != 'nul') {console.log("newly created ID: ", identifyId.value); loadLastIdentification()}
         if (chatHistory && chatHistory.value && Array.isArray(chatHistory.value) && chatHistory.value.length > 0) {
             setMessages(messages => chatHistory.value);
             setLoadingFailed(false);
@@ -80,7 +95,7 @@ export function Chat() {
             setLoadingFailed(true);
         }
         setLoading(false);
-    }, [chatHistory, identifyResult, promptSent, resetting, sendMessage]);
+    }, [chatHistory, identifyResult, identifyId, promptSent, resetting, sendMessage]);
 
     useEffect(() => {
         if (readyToSend) {

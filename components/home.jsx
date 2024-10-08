@@ -1,11 +1,17 @@
 "use client";
 import React, {useState, useEffect } from 'react';
 import { Carousel } from 'components/carousel.jsx'
+import { UserButton} from '@clerk/nextjs'
 import Link from 'next/link';
 
 export function Home() {
     return (
         <div className="d-flex flex-row w-100 h-100 py-4 px-4 justify-content-center">
+
+            <div className="d-flex flex-column col">
+                <div className="ps-2">
+                </div>
+            </div>
 
             <div className="d-flex flex-column col-8 justify-content-center">
                 <div className="d-flex flex-column col">
@@ -28,6 +34,10 @@ export function Home() {
                 <div className="d-flex flex-column col">
                     <Carousel/>
                 </div>
+            </div>
+
+            <div className="d-flex flex-column col justify-content-start align-items-end">
+                <UserButton />
             </div>
 
         </div>

@@ -10,7 +10,7 @@ export default function Page() {
                     <Identify />
                 </SignedIn>
                 <SignedOut>
-                    <p>Signed out. Please Sign in on the authentication page to see the chat.</p>
+                    <p>Signed out. Please return to the <a href="https://concrastination.netlify.app/">home page</a>.</p>
                 </SignedOut>
             </section>
         </main>

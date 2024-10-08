@@ -4,14 +4,18 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useData } from './data-context';
 import { useRouter } from 'next/navigation';
+import { createSupabaseClientWithClerk } from './supabase';
 
 export function Identify() {
+    // Supabase client
+    const supabaseClient = createSupabaseClientWithClerk();
+
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [previousQuestion, setPreviousQuestion] = useState([]);
-    const [finalAnswer, setFinalAnswer] = useState("lklklk");
+    const [finalAnswer, setFinalAnswer] = useState("None");
     const [fadeOut, setFadeOut] = useState(false);
     const [fadeIn, setFadeIn] = useState(false);
-    const { identifyResult, setIdentifyResult, setChatHistory } = useData();
+    const { identifyResult, setIdentifyResult, setIdentifyId, setChatHistory } = useData();
     const router = useRouter();
 
     const questions = [
@@ -103,8 +107,23 @@ export function Identify() {
         }, 1000);
     };
 
+    // insert identification into supabase
+    async function createIdentification() {
+        const { data, error } = await supabaseClient.from('identification').insert({ result: finalAnswer, quick_selected: false }).select('id')
+        if (error) {
+            console.error('Error inserting identification:', error);
+            return;
+        }
+    
+        if (data && data.length > 0) {
+            setIdentifyId({ value: data[0].id});
+        }
+    }
+
     const handleNavigate = () => {
       setIdentifyResult({ value: finalAnswer });
+      createIdentification();
+
       router.push('/chat');
     };
 

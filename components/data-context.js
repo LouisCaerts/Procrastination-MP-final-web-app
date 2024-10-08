@@ -7,15 +7,20 @@ const DataContext = createContext();
 
 export const DataProvider = ({ children }) => {
   const [identifyResult, setIdentifyResult] = useState(null);
+  const [identifyId, setIdentifyId] = useState(null);
   const [chatHistory, setChatHistory] = useState(null);
 
   // Load data from localStorage on mount
   useEffect(() => {
     const storedIdentifyResult = localStorage.getItem('identifyResult');
+    const storedIdentifyId = localStorage.getItem('identifyId');
     const storedChatHistory = localStorage.getItem('chatHistory');
 
     if (storedIdentifyResult) {
       setIdentifyResult(JSON.parse(storedIdentifyResult));
+    }
+    if (storedIdentifyId) {
+      setIdentifyId(JSON.parse(storedIdentifyId));
     }
     if (storedChatHistory) {
       setChatHistory(JSON.parse(storedChatHistory));
@@ -32,6 +37,14 @@ export const DataProvider = ({ children }) => {
   }, [identifyResult]);
 
   useEffect(() => {
+    if (identifyId && identifyId.value > -1) {
+        localStorage.setItem('identifyId', JSON.stringify(identifyId));
+    } else {
+        localStorage.removeItem('identifyId');
+    }
+  }, [identifyId]);
+
+  useEffect(() => {
     if (chatHistory && chatHistory.value && chatHistory.value.length > 0) {
         localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
     } else {
@@ -40,7 +53,7 @@ export const DataProvider = ({ children }) => {
   }, [chatHistory]);
 
   return (
-    <DataContext.Provider value={{ identifyResult, setIdentifyResult, chatHistory, setChatHistory }}>
+    <DataContext.Provider value={{ identifyResult, setIdentifyResult, identifyId, setIdentifyId, chatHistory, setChatHistory }}>
       {children}
     </DataContext.Provider>
   );
