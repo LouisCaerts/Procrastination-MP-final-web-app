@@ -36,6 +36,7 @@ export function TodoList({ todos, setTodos }) {
                     const supabaseAccessToken = await session.getToken({
                         template: 'supabase',
                     });
+                    console.log(supabaseAccessToken)
                     const supabase = await supabaseClient(supabaseAccessToken);
                     const { data: todos } = await supabase.from('todos').select('*');
                     setTodos(todos);

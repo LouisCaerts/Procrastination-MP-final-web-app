@@ -5,17 +5,20 @@ import Link from 'next/link';
 import { useData } from './data-context';
 import { useRouter } from 'next/navigation';
 import { createSupabaseClientWithClerk } from './supabase';
+import { useSession } from '@clerk/nextjs'
 
 export function Identify() {
-    // Supabase client
-    const supabaseClient = createSupabaseClientWithClerk();
+    /* Supabase client */
+    const [supabaseClient, setSupabaseClient] = useState(null);
+    const { session, isLoaded } = useSession();
+    const [databaseLoaded, setDatabaseLoaded] = useState(false);
+    const [uploadError, setUploadError] = useState(false);
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [previousQuestion, setPreviousQuestion] = useState([]);
     const [finalAnswer, setFinalAnswer] = useState("None");
     const [fadeOut, setFadeOut] = useState(false);
     const [fadeIn, setFadeIn] = useState(false);
-    const { identifyResult, setIdentifyResult, setIdentifyId, setChatHistory } = useData();
     const router = useRouter();
 
     const questions = [
@@ -76,16 +79,10 @@ export function Identify() {
           setCurrentQuestion(nextQuestion);
           setFadeOut(false);
           setFadeIn(true);
-
-          if (nextQuestion > questions.length) {
-              setChatHistory([]);
-          }
           
           // Delay fade-in effect to match transition
-          setTimeout(() => {
-            setFadeIn(false);
-          }, 1000);
-        }, 1000);  // Match the CSS transition duration for fade-out
+          setFadeIn(false);
+        }, 500);  // Match the CSS transition duration for fade-out
     };
 
     const handleReturn = () => {
@@ -101,42 +98,85 @@ export function Identify() {
             setFadeOut(false)
             setFadeIn(true)
 
-            setTimeout(() => {
-                setFadeIn(false);
-            }, 1000);
-        }, 1000);
+            setFadeIn(false);
+        }, 500);
     };
 
+    useEffect(() => {
+        if (currentQuestion >= questions.length && finalAnswer != "None" && databaseLoaded) {
+            uploadResult();
+        }
+    }, [currentQuestion, questions.length, finalAnswer, databaseLoaded]);
+
     // insert identification into supabase
-    async function createIdentification() {
-        const { data, error } = await supabaseClient.from('identification').insert({ result: finalAnswer, quick_selected: false }).select('id')
+    async function uploadResult(result) {
+        console.log("Supabase client: ", supabaseClient)
+        console.log("Clerk session: ", session)
+        const { data, error } = await supabaseClient.from('chat').insert({ identification: finalAnswer, intervention: finalAnswer, reviewed: false, quick_selected: false }).select()
         if (error) {
-            console.error('Error inserting identification:', error);
-            return;
+            console.error('Error inserting new chat:', error);
+            setUploadError(true);
         }
     
         if (data && data.length > 0) {
-            setIdentifyId({ value: data[0].id});
+            handleNavigate();
         }
     }
 
     const handleNavigate = () => {
-      setIdentifyResult({ value: finalAnswer });
-      createIdentification();
+        const timer = setTimeout(() => {
+            router.push('/chat');
+        }, 1000);
 
-      router.push('/chat');
+        // Clean up the timer if the component unmounts
+        return () => clearTimeout(timer);
     };
 
-    useEffect(() => {
-        if (currentQuestion >= questions.length) {
-            const timer = setTimeout(() => {
-                handleNavigate();
-            }, 3000);
+    const handleReset = () => {
+        router.push('/');
+    };
+
     
-            // Clean up the timer if the component unmounts
-            return () => clearTimeout(timer);
+
+    // Page loading ( 1: database needs to be initialised )
+    useEffect(() => {
+        const loadDatabase = async () => {
+              try {
+                setDatabaseLoaded(false);
+                if (isLoaded) {
+                    const supabaseAccessToken = await session.getToken({
+                        template: 'supabase',
+                    });
+                    setSupabaseClient(createSupabaseClientWithClerk(supabaseAccessToken));
+                    setDatabaseLoaded(true);
+                }
+            } catch (e) {
+                console.log('Exception while fetching todos:', e);
+            }
         }
-    }, [currentQuestion, questions.length]); // Dependencies to run effect
+        loadDatabase();
+    }, [isLoaded]);
+
+    // Page loading ( 2: load identification )
+    useEffect(() => {
+        if (databaseLoaded) {
+            console.log("DATABASE LOADED")
+        }
+    }, [databaseLoaded]);
+
+    if (uploadError) {
+        return (
+          <div className="d-flex flex-column align-items-center justify-content-center w-100 text-center">
+            <p>Error uploading your result to the database.</p>
+            <p>Please return to the home screen and try again.</p>
+            <Link href="/" className="inline-block px-1.5 py-1 transition hover:opacity-80 sm:px-3 sm:py-2" >
+                <button className="" onClick={handleReset}>
+                    <i className="bi bi-house custom-icon-normal align-self-start"></i>
+                </button>
+            </Link>
+          </div>
+        );
+    }
 
     return (
         <div className="d-flex flex-row w-100 h-100 py-4 px-4 justify-content-center">

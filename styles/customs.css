@@ -142,7 +142,7 @@
 
 .custom-question {
     opacity: 1;
-    transition: opacity 1.0s ease-in-out;
+    transition: opacity 0.5s ease-in-out;
 }
   
 .custom-question.fade-out {
@@ -151,8 +151,8 @@
   
 .custom-question.fade-in {
     opacity: 0;   /* Start from invisible */
-    transition: opacity 1.0s ease-in-out;
-    animation: fadeIn 1.0s forwards;  /* Fade-in animation */
+    transition: opacity 0.5s ease-in-out;
+    animation: fadeIn 0.5s forwards;  /* Fade-in animation */
 }
   
 @keyframes fadeIn {
