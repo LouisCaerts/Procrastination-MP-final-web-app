@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import sendQuery from './chat.js';
 import { createSupabaseClientWithClerk } from './supabase';
 import { useSession, useAuth } from '@clerk/nextjs'
+import { useData } from './data-context';
+import prompts from 'data/prompts.json';
 
 const explainer = `
 This page contains the chat functionality of the web app.
@@ -16,12 +18,15 @@ export function Chat() {
     const [supabaseClient, setSupabaseClient] = useState(null);
     const { session, isLoaded } = useSession()
     const [databaseLoaded, setDatabaseLoaded] = useState(false)
+    const [chatIdentifier, setChatIdentifier] = useState(-1)
 
     /* Variables */
     const [messages, setMessages] = useState([]);
     const [readyToSend, setReadyToSend] = useState(false);
+    const [fatalError, setFatalError] = useState(false);
     const [input, setInput] = useState('');
     const router = useRouter();
+    const { chatId, setChatId } = useData();
 
 
     /* Functions */
@@ -43,70 +48,92 @@ export function Chat() {
         setReadyToSend(true);
     };
 
-    const sendMessage = async (gpt=false, response=input, isPrompt=false) => {
+    const sendMessage = async (gpt=false, response=input, isPrompt=false, chat_id=chatIdentifier) => {
         if (JSON.stringify(response).trim() === '') return;
       
+        // front end update
         if (!gpt && !isPrompt) {
             setMessages(messages => [{ role: 'user', content: response, isPrompt: false }, ...messages]);
-            //setChatHistory({ value: [{ role: 'user', content: response, isPrompt: false }, ...messages] });
             setInput('');
         } else if (!gpt && isPrompt) {
             setMessages(messages => [{ role: 'user', content: response, isPrompt: true }, ...messages]);
-            //setChatHistory({ value: [{ role: 'user', content: response, isPrompt: true }, ...messages] });
         } else {
             setMessages(messages => [{ role: 'assistant', content: response, isPrompt: false }, ...messages]);
-            //setChatHistory({ value: [{ role: 'assistant', content: response, isPrompt: false }, ...messages] });
         }
+
+        // back end update
+        const role = gpt ? "assistant" : "user";
+        uploadMessage(role, response, isPrompt, chat_id);
     };
 
+    async function uploadMessage(role, content, isPrompt, chat_id) {
+        const { data, error } = await supabaseClient.from('message').insert({ role: role, content: content, isPrompt: isPrompt, chat_id: chat_id }).select('id')
+        if (error) {
+            console.error('Error inserting new message:', error);
+            setUploadError(true);
+        }
+    
+        if (data && data.length > 0 && data[0].id) {
+            console.log("NEW MESSAGE ID = ", data[0].id)
+        }
+    }
+
     async function loadData() {
-        console.log("Loading data...")
+        console.log("Loading data...");
 
-        console.log("Resolving identification...")
-        const { identification_result, identification_id } = await loadIdentification();
+        console.log("Loading chat entity...");
+        const { chat_id, chat_intervention } =  await loadChat();
+        setChatIdentifier(chat_id);
 
-        console.log("Resolving chat...")
-        await loadChat(identification_result, identification_id);
+        console.log("Loading message entities...");
+        const { messages } =  await loadMessages(chat_id);
+        console.log("Messages: ", messages);
+
+        if (messages.length == 0) {
+            prompt = prompts[chat_intervention];
+            await sendMessage(false, prompt, true, chat_id);
+            setReadyToSend(true);
+        }
+        else {
+            setMessages(messages);
+        }
 
         console.log("Data loaded!")
     }
 
-    async function loadIdentification() {
-        const { data, error } = await supabaseClient
-        .from('identification')
-        .select()
-        .order('created_at', { ascending: false })
-        .limit(1);
-        if (!error) {
-            if (data.length == 0) return;
-            else {
-                console.log("IDENTIFICATION LOADED");
-                return {identification_result: data[0].result, identification_id: data[0].id};
-            };
-        } else {
-            console.error("Unable to retrieve last identification");
-            return;
-        }
-    }
-
-    async function loadChat(identificatiin_result, identification_id) {
+    async function loadChat() {
         const { data, error } = await supabaseClient
         .from('chat')
+        .select()
+        .order('start', { ascending: false })
+        .limit(1);
         if (!error) {
-            if (data.length == 0) return null;
+            if (data.length == 0) { return null; setFatalError(true); }
             else {
-                setLastIdentificationResult(data[0].result);
-                setLastIdentificationId(data[0].id);
-                console.log("IDENTIFICATION LOADED");
+                console.log("Chat entity loaded!");
+                return {chat_id: data[0].id, chat_intervention: data[0].intervention};
             }
         } else {
-            console.error("Unable to retrieve last identification");
-            return null;
+            console.error("Unable to retrieve last chat entity.");
+            setFatalError(true);
+            return {chat_id: null, chat_intervention: null};
         }
     }
 
-    async function loadMessages() {
-        return []
+    async function loadMessages(chat_id) {
+        const { data, error } = await supabaseClient
+        .from('message')
+        .select('role,content,isPrompt')
+        .eq('chat_id', chat_id)
+        .order('send_time', { ascending: false });
+        if (!error) {
+            console.log("Message entities loaded!");
+            return {messages: data};
+        } else {
+            console.error("Unable to retrieve message entities.");
+            setFatalError(true);
+            return {messages: null};
+        }
     }
 
     const setUp = () => {
@@ -132,14 +159,14 @@ export function Chat() {
                     const supabaseAccessToken = await session.getToken({
                         template: 'supabase',
                     });
-                    setSupabaseClient(await createSupabaseClientWithClerk(supabaseAccessToken));
+                    setSupabaseClient(createSupabaseClientWithClerk(supabaseAccessToken));
                     setDatabaseLoaded(true);
                 }
             } catch (e) {
                 console.log('Exception while fetching todos:', e);
             }
         }
-        loadDatabase()
+        loadDatabase();
     }, [isLoaded]);
 
     // Page loading ( 2: load identification )

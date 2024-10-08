@@ -20,6 +20,7 @@ export function Identify() {
     const [fadeOut, setFadeOut] = useState(false);
     const [fadeIn, setFadeIn] = useState(false);
     const router = useRouter();
+    const { setChatId } = useData();
 
     const questions = [
         {
@@ -106,19 +107,22 @@ export function Identify() {
         if (currentQuestion >= questions.length && finalAnswer != "None" && databaseLoaded) {
             uploadResult();
         }
+        else if (currentQuestion >= questions.length && finalAnswer != "None" && !databaseLoaded) {
+            setUploadError(true);
+        }
     }, [currentQuestion, questions.length, finalAnswer, databaseLoaded]);
 
     // insert identification into supabase
     async function uploadResult(result) {
-        console.log("Supabase client: ", supabaseClient)
-        console.log("Clerk session: ", session)
-        const { data, error } = await supabaseClient.from('chat').insert({ identification: finalAnswer, intervention: finalAnswer, reviewed: false, quick_selected: false }).select()
+        const { data, error } = await supabaseClient.from('chat').insert({ identification: finalAnswer, intervention: finalAnswer, reviewed: false, quick_selected: false }).select('id')
         if (error) {
             console.error('Error inserting new chat:', error);
             setUploadError(true);
         }
     
-        if (data && data.length > 0) {
+        if (data && data.length > 0 && data[0].id) {
+            console.log("NEW CHAT ID = ", data[0].id)
+            setChatId(data[0]);
             handleNavigate();
         }
     }
