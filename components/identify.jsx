@@ -114,7 +114,8 @@ export function Identify() {
 
     // insert identification into supabase
     async function uploadResult(result) {
-        const { data, error } = await supabaseClient.from('chat').insert({ identification: finalAnswer, intervention: finalAnswer, reviewed: false, quick_selected: false }).select('id')
+        let interv = await selectIntervention(finalAnswer);
+        const { data, error } = await supabaseClient.from('chat').insert({ identification: finalAnswer, intervention: interv, reviewed: false, quick_selected: false }).select('id')
         if (error) {
             console.error('Error inserting new chat:', error);
             setUploadError(true);
@@ -122,8 +123,46 @@ export function Identify() {
     
         if (data && data.length > 0 && data[0].id) {
             console.log("NEW CHAT ID = ", data[0].id)
+            const { data2, error2 } = await supabaseClient.from('review').insert({ chat_id: data[0].id })
+            if (error2) {
+                console.error('Error inserting new review:', error);
+                setUploadError(true);
+            }
             setChatId(data[0]);
             handleNavigate();
+        }
+    }
+
+    async function selectIntervention(trueresult) {
+        var switchdate = '';
+        const currentdate = new Date();
+        var newresult = '';
+
+        const { data, error } = await supabaseClient
+        .from('user')
+        .select('switched_at')
+        .limit(1);
+        if (!error) {
+            if (data.length == 0) { return null; }
+            else {
+                console.log("User entity loaded!");
+                switchdate = new Date(data[0].switched_at);
+                if (currentdate > switchdate) {
+                    const choiceoptions = ["FocusOnProcess", "DurationEstimation", "SelfForgiveness", "SelfCompassion"];
+                    while (newresult == '' || newresult == trueresult) {
+                        
+                        console.log(newresult);
+                        let randomIndex = Math.floor(Math.random() * choiceoptions.length);
+                        newresult = choiceoptions[randomIndex];
+                    }
+                    return newresult;
+                } else {
+                    return trueresult;
+                }
+            }
+        } else {
+            console.error("Unable to retrieve last user entity.");
+            return null;
         }
     }
 
@@ -170,7 +209,7 @@ export function Identify() {
 
     if (uploadError) {
         return (
-          <div className="d-flex flex-column align-items-center justify-content-center w-100 text-center">
+          <div className="d-flex flex-column align-items-center justify-content-center w-100 custom-grow text-center">
             <p>Error uploading your result to the database.</p>
             <p>Please return to the home screen and try again.</p>
             <Link href="/" className="inline-block px-1.5 py-1 transition hover:opacity-80 sm:px-3 sm:py-2" >
@@ -183,7 +222,7 @@ export function Identify() {
     }
 
     return (
-        <div className="d-flex flex-row w-100 h-100 py-4 px-4 justify-content-center">
+        <div className="d-flex flex-row w-100 h-100 custom-grow py-4 px-4 justify-content-center">
 
             <div className="d-flex flex-column col-8 justify-content-center text-center">
 

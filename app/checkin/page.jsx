@@ -1,4 +1,4 @@
-import { Chat } from 'components/chat.jsx'
+import { Checkin } from 'components/checkin.jsx'
 import { SignedIn, SignedOut } from '@clerk/nextjs'
 
 
@@ -11,15 +11,14 @@ This page contains the first draft of a chat page with OpenAI's ChatGPT
 `;
 
 export default function Page() {
-    
     return (
         <main className="custom-grow">
             <section className="custom-grow">
                 <SignedIn>
-                    <Chat />
+                    <Checkin />
                 </SignedIn>
                 <SignedOut>
-                    <p>Please Sign in on the authentication page to see the chat.</p>
+                    <p>Signed out. Please return to the <a href="https://concrastination.netlify.app/">home page</a>.</p>
                 </SignedOut>
             </section>
         </main>

@@ -13,6 +13,8 @@ export async function handler(event) {
     model: "gpt-3.5-turbo",
   });
 
+  console.log("AAAAAAAAAAAAAAAA", " ", completion)
+
   // Prepare the response object
   const response = {
     statusCode: 200, // Status code indicating success

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import sendQuery from './chat.js';
+import sendQuerySummary from './chat_summary.js';
 import { createSupabaseClientWithClerk } from './supabase';
 import { useSession, useAuth } from '@clerk/nextjs'
 import { useData } from './data-context';
@@ -24,6 +25,7 @@ export function Chat() {
     const [messages, setMessages] = useState([]);
     const [readyToSend, setReadyToSend] = useState(false);
     const [fatalError, setFatalError] = useState(false);
+    const [uploadError, setUploadError] = useState(false);
     const [input, setInput] = useState('');
     const router = useRouter();
     const { chatId, setChatId } = useData();
@@ -63,6 +65,7 @@ export function Chat() {
 
         // back end update
         const role = gpt ? "assistant" : "user";
+
         uploadMessage(role, response, isPrompt, chat_id);
     };
 
@@ -108,7 +111,7 @@ export function Chat() {
         .order('start', { ascending: false })
         .limit(1);
         if (!error) {
-            if (data.length == 0) { return null; setFatalError(true); }
+            if (data.length == 0) { setFatalError(true); return null; }
             else {
                 console.log("Chat entity loaded!");
                 return {chat_id: data[0].id, chat_intervention: data[0].intervention};
@@ -190,8 +193,23 @@ export function Chat() {
 
 
     /* html */
+
+    if (fatalError) {
+        return (
+            <div className="d-flex flex-column align-items-center justify-content-center w-100 text-center">
+              <p>Loading the chat has failed.</p>
+              <p>Please return to the home screen and take the questionnaire again or contact Louis.Caerts@gmail.com.</p>
+              <Link href="/" className="inline-block px-1.5 py-1 transition hover:opacity-80 sm:px-3 sm:py-2" >
+                  <button className="" onClick={handleReset}>
+                      <i className="bi bi-house custom-icon-normal align-self-start"></i>
+                  </button>
+              </Link>
+            </div>
+        );
+    }
+
     return (
-        <div className="d-flex flex-row w-100 h-100 py-4 px-4" suppressHydrationWarning>
+        <div className="d-flex flex-row w-100 py-4 px-4" suppressHydrationWarning>
             <div className="d-flex flex-column col">
                 <div className="ps-2">
                     <button className="btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#exitModal">
