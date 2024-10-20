@@ -8,6 +8,7 @@ import { createSupabaseClientWithClerk } from './supabase';
 import { useSession, useAuth } from '@clerk/nextjs'
 import { useData } from './data-context';
 import prompts from 'data/prompts.json';
+import Link from 'next/link';
 
 const explainer = `
 This page contains the chat functionality of the web app.

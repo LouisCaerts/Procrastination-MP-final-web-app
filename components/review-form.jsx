@@ -88,7 +88,7 @@ export function ReviewForm({ reviewData }) {
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="form-label">
-            <h5>The chatbot's suggestions were effective and relevant for my concerns at the time.</h5>
+            <h5>The chatbot&apos;s suggestions were effective and relevant for my concerns at the time.</h5>
           </label>
           <div className="d-flex flex-column flex-md-row justify-content-between">
             <div className="form-check">

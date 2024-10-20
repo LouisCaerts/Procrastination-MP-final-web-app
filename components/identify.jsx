@@ -140,14 +140,14 @@ export function Identify() {
 
         const { data, error } = await supabaseClient
         .from('user')
-        .select('switched_at')
-        .limit(1);
+        .select('switched_at, group');
+        const usergroup = data[0].group;
+        switchdate = new Date(data[0].switched_at);
         if (!error) {
             if (data.length == 0) { return null; }
             else {
                 console.log("User entity loaded!");
-                switchdate = new Date(data[0].switched_at);
-                if (currentdate > switchdate) {
+                if ((usergroup == 'A' && currentdate > switchdate) || (usergroup == 'B' && currentdate <= switchdate)) {
                     const choiceoptions = ["FocusOnProcess", "DurationEstimation", "SelfForgiveness", "SelfCompassion"];
                     while (newresult == '' || newresult == trueresult) {
                         
