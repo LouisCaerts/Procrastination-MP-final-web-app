@@ -18,7 +18,7 @@ export function Carousel() {
         <div className="">
             
             <h3 className='text-center fw-normal'>Did you know:</h3>
-            <div id="carouselHome" className="carousel slide d-flex justify-content-center" data-bs-ride="carousel">
+            <div id="carouselHome" className="carousel slide d-flex justify-content-center pointer-event" data-bs-ride="carousel">
               <div className="carousel-inner d-inline-flex text-center">
                 <div className="carousel-item active" data-bs-interval={carouselHomeInterval}>
                   <p>20% of people are chronic procrastinators! You&apos;re definitely not alone in putting things off.</p>

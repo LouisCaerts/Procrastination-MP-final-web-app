@@ -1,11 +1,14 @@
 "use client";
-import { useAuth, useUser, UserButton, SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/nextjs'
-import React, { useState, useEffect, useRef } from 'react';
-import { flushSync } from 'react-dom';
-import sendQuery from './chat.js'
-import Link from 'next/link';
-import { useData } from './data-context.js';
+
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import sendQuery from './chat.js';
+import sendQuerySummary from './chat_summary.js';
+import { createSupabaseClientWithClerk } from './supabase';
+import { useSession, useAuth } from '@clerk/nextjs'
+import { useData } from './data-context';
+import prompts from 'data/prompts.json';
+import Link from 'next/link';
 
 const explainer = `
 This page contains the chat functionality of the web app.
@@ -13,182 +16,273 @@ Users must be logged in in order to access the core of the app.
 `;
 
 export function Chat() {
-    const { isLoaded, isSignedIn, user } = useUser();
-    const [input, setInput] = useState('');
-    const [readyToSend, setReadyToSend] = useState(false);
-    const { chatHistory, setChatHistory, identifyResult, setIdentifyResult } = useData();
-    const [finalAnswer, setFinalAnswer] = useState("none");
-    const [loading, setLoading] = useState(true);
-    const [loadingFailed, setLoadingFailed] = useState(false);
-    const [promptSent, setPromptSent] = useState(false);
-    const [resetting, setResetting] = useState(false);
+    /* Supabase client */
+    const [supabaseClient, setSupabaseClient] = useState(null);
+    const { session, isLoaded } = useSession()
+    const [databaseLoaded, setDatabaseLoaded] = useState(false)
+    const [chatIdentifier, setChatIdentifier] = useState(-1)
+
+    /* Variables */
     const [messages, setMessages] = useState([]);
+    const [readyToSend, setReadyToSend] = useState(false);
+    const [fatalError, setFatalError] = useState(false);
+    const [uploadError, setUploadError] = useState(false);
+    const [input, setInput] = useState('');
     const router = useRouter();
+    const { chatId, setChatId } = useData();
 
-    const [showExitModal, setShowExitModal] = useState(false);
-    const handleShowExitModal = () => setShowExitModal(true);
-    const handleCloseExitModal = () => setShowExitModal(false);
 
-    const sendMessage = async (gpt=false, response=input, isPrompt=false) => {
-      if (JSON.stringify(response).trim() === '') return;
-    
-      if (!gpt && !isPrompt) {
-        setMessages(messages => [{ role: 'user', content: response, isPrompt: false }, ...messages]);
-        setChatHistory({ value: [{ role: 'user', content: response, isPrompt: false }, ...messages] });
-        setInput('');
-      } else if (!gpt && isPrompt) {
-        setMessages(messages => [{ role: 'user', content: response, isPrompt: true }, ...messages]);
-        setChatHistory({ value: [{ role: 'user', content: response, isPrompt: true }, ...messages] });
-      } else {
-        setMessages(messages => [{ role: 'assistant', content: response, isPrompt: false }, ...messages]);
-        setChatHistory({ value: [{ role: 'assistant', content: response, isPrompt: false }, ...messages] });
-      }
-      
-    };
-
-    const handleSendMessage = async (event) => {
-      event.preventDefault(); // Prevent the default form submission behavior
-      flushSync(() => {
-        sendMessage(false, input);
-      });
-      setReadyToSend(true);
-    };
-
+    /* Functions */
     const handleReset = () => {
-        setResetting(true)
-        setChatHistory({ value: [] });
-        setIdentifyResult({ value: "none" });
-        setShowExitModal(true);
+        //setResetting(true)
+        //setChatHistory({ value: [] });
+        //setIdentifyResult({ value: "None" });
+        //setIdentifyId({ value: "null" });
+        //setShowExitModal(true);
         router.push('/');
     };
 
-    useEffect(() => {
-        if (chatHistory && chatHistory.value && Array.isArray(chatHistory.value) && chatHistory.value.length > 0) {
-            setMessages(messages => chatHistory.value);
-            setLoadingFailed(false);
-        } 
-        else if (identifyResult && identifyResult.value && identifyResult.value != "none" && !promptSent) {
-            setFinalAnswer(identifyResult);
-            const prompt = "You are about to chat to a user and this message is just so you understand the context and will not be displayed to that user.\
-                            The user took a quiz and their final result was \"" + identifyResult.value + "\".\
-                            All you have to do is greet the user, repeat their final result, and explain what it could mean in the context of reasons for procrastination.\
-                            Finally, just invite them to give their own thoughts."
-            sendMessage(false, prompt, true);
-            setPromptSent(true);
-            setReadyToSend(true);
-            setLoadingFailed(false);
-        }
-        else if (!resetting) {
-            setLoadingFailed(true);
-        }
-        setLoading(false);
-    }, [chatHistory, identifyResult, promptSent, resetting, sendMessage]);
+    const handleSendMessage = async (event) => {
+        event.preventDefault();
+        sendMessage(false, input);
+        //flushSync(() => {
+        //  sendMessage(false, input);
+        //});
+        setReadyToSend(true);
+    };
 
+    const sendMessage = async (gpt=false, response=input, isPrompt=false, chat_id=chatIdentifier) => {
+        if (JSON.stringify(response).trim() === '') return;
+      
+        // front end update
+        if (!gpt && !isPrompt) {
+            setMessages(messages => [{ role: 'user', content: response, isPrompt: false }, ...messages]);
+            setInput('');
+        } else if (!gpt && isPrompt) {
+            setMessages(messages => [{ role: 'user', content: response, isPrompt: true }, ...messages]);
+        } else {
+            setMessages(messages => [{ role: 'assistant', content: response, isPrompt: false }, ...messages]);
+        }
+
+        // back end update
+        const role = gpt ? "assistant" : "user";
+
+        uploadMessage(role, response, isPrompt, chat_id);
+    };
+
+    async function uploadMessage(role, content, isPrompt, chat_id) {
+        const { data, error } = await supabaseClient.from('message').insert({ role: role, content: content, isPrompt: isPrompt, chat_id: chat_id }).select('id')
+        if (error) {
+            console.error('Error inserting new message:', error);
+            setUploadError(true);
+        }
+    
+        if (data && data.length > 0 && data[0].id) {
+            console.log("NEW MESSAGE ID = ", data[0].id)
+        }
+    }
+
+    async function loadData() {
+        console.log("Loading data...");
+
+        console.log("Loading chat entity...");
+        const { chat_id, chat_intervention } =  await loadChat();
+        setChatIdentifier(chat_id);
+
+        console.log("Loading message entities...");
+        const { messages } =  await loadMessages(chat_id);
+        console.log("Messages: ", messages);
+
+        if (messages.length == 0) {
+            prompt = prompts[chat_intervention];
+            await sendMessage(false, prompt, true, chat_id);
+            setReadyToSend(true);
+        }
+        else {
+            setMessages(messages);
+        }
+
+        console.log("Data loaded!")
+    }
+
+    async function loadChat() {
+        const { data, error } = await supabaseClient
+        .from('chat')
+        .select()
+        .order('start', { ascending: false })
+        .limit(1);
+        if (!error) {
+            if (data.length == 0) { setFatalError(true); return null; }
+            else {
+                console.log("Chat entity loaded!");
+                return {chat_id: data[0].id, chat_intervention: data[0].intervention};
+            }
+        } else {
+            console.error("Unable to retrieve last chat entity.");
+            setFatalError(true);
+            return {chat_id: null, chat_intervention: null};
+        }
+    }
+
+    async function loadMessages(chat_id) {
+        const { data, error } = await supabaseClient
+        .from('message')
+        .select('role,content,isPrompt')
+        .eq('chat_id', chat_id)
+        .order('send_time', { ascending: false });
+        if (!error) {
+            console.log("Message entities loaded!");
+            return {messages: data};
+        } else {
+            console.error("Unable to retrieve message entities.");
+            setFatalError(true);
+            return {messages: null};
+        }
+    }
+
+    const setUp = () => {
+        return
+    };
+
+    // Effect hooks
     useEffect(() => {
         if (readyToSend) {
             const response = sendQuery(messages.slice().reverse());
-            response.then(data => {if (data.length == 0) { setLoadingFailed(true); } else { sendMessage(true, data) }});
-            setReadyToSend(false); // Reset the flag
+            response.then(data => {if (data.length == 0) { console.error("OpenAI failed to return content. Please try again."); } else { sendMessage(true, data) }});
+            setReadyToSend(false);
         }
-    }, [readyToSend, messages, sendMessage]);
+    }, [readyToSend]);
 
-    if (loadingFailed) {
-        return (
-          <div className="d-flex flex-column align-items-center justify-content-center w-100 text-center">
-            <p>Loading the chat interface has failed.</p>
-            <p>Please return to the home screen and either quick select your current procrastination-related issue or take the questionnaire again.</p>
-            <Link href="/" className="inline-block px-1.5 py-1 transition hover:opacity-80 sm:px-3 sm:py-2" >
-                <button className="" onClick={handleReset}>
-                    <i className="bi bi-house custom-icon-normal align-self-start"></i>
-                </button>
-            </Link>
-          </div>
-        );
-    }
 
-    if (loading) {
+    // Page loading ( 1: database needs to be initialised )
+    useEffect(() => {
+        const loadDatabase = async () => {
+              try {
+                setDatabaseLoaded(false);
+                if (isLoaded) {
+                    const supabaseAccessToken = await session.getToken({
+                        template: 'supabase',
+                    });
+                    setSupabaseClient(createSupabaseClientWithClerk(supabaseAccessToken));
+                    setDatabaseLoaded(true);
+                }
+            } catch (e) {
+                console.log('Exception while fetching todos:', e);
+            }
+        }
+        loadDatabase();
+    }, [isLoaded]);
+
+    // Page loading ( 2: load identification )
+    useEffect(() => {
+        if (databaseLoaded) {
+            console.log("DATABASE LOADED")
+            loadData();
+        }
+    }, [databaseLoaded]);
+
+    // Page closing
+    useEffect(() => {
+        const handleUnload = (event) => {
+          event.preventDefault();
+          console.log('Page is closing');
+          event.returnValue = ''; // Required for Chrome
+        };
+      
+        window.addEventListener('beforeunload', handleUnload);
+    }, []);
+
+
+    /* html */
+
+    if (fatalError) {
         return (
-          <div className="d-flex align-items-center justify-content-center w-100 text-center">
-            <p>Loading...</p>
-          </div>
+            <div className="d-flex flex-column align-items-center justify-content-center w-100 text-center">
+              <p>Loading the chat has failed.</p>
+              <p>Please return to the home screen and take the questionnaire again or contact Louis.Caerts@gmail.com.</p>
+              <Link href="/" className="inline-block px-1.5 py-1 transition hover:opacity-80 sm:px-3 sm:py-2" >
+                  <button className="" onClick={handleReset}>
+                      <i className="bi bi-house custom-icon-normal align-self-start"></i>
+                  </button>
+              </Link>
+            </div>
         );
     }
 
     return (
-      <div className="d-flex flex-row w-100 h-100 py-4 px-4" suppressHydrationWarning>
-        <div className="d-flex flex-column col">
-          <div className="ps-2">
-            <button className="custom-button-invisible" type="button" data-bs-toggle="modal" data-bs-target="#exitModal">
-                <i className="bi bi-stop-circle custom-icon-normal align-self-start"></i>
-            </button>
-          </div>
-        </div>
-
-        <div className="modal fade" id="exitModal" tabIndex="-1" role="dialog" aria-labelledby="exitModalLabel" aria-hidden="true">
-            <div className="modal-dialog modal-dialog-centered" role="document">
-                <div className="modal-content">
-                <div className="modal-header">
-                    <h5 className="modal-title" id="exitModalLabel">Warning!</h5>
-                    <button type="button" className="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+        <div className="d-flex flex-row w-100 py-4 px-4" suppressHydrationWarning>
+            <div className="d-flex flex-column col">
+                <div className="ps-2">
+                    <button className="btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#exitModal">
+                        <i className="bi bi-stop-circle align-self-start"></i> End Conversation
                     </button>
                 </div>
-                <div className="modal-body">
-                    You are about to permanently end this conversation.
-                </div>
-                <div className="modal-footer">
-                    <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exitModal" onClick={handleReset}>Confirm</button>
-                </div>
+            </div>
+
+            <div className="modal fade" id="exitModal" tabIndex="-1" role="dialog" aria-labelledby="exitModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered" role="document">
+                    <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title" id="exitModalLabel">Warning!</h5>
+                        <button type="button" className="close custom-button-invisible" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div className="modal-body">
+                        You are about to permanently end this conversation.
+                    </div>
+                    <div className="modal-footer">
+                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exitModal" onClick={handleReset}>Confirm</button>
+                    </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div className="d-flex flex-column col-8 justify-content-end">
-          <div className="d-flex flex-column-reverse overflow-auto my-3" id="chat-window">
-            {messages.filter(msg => !msg.isPrompt).map((msg, index) => (
-              <div key={index} className={`${msg.role === 'user' ? 'custom-message-user' : 'custom-message-assistant'}`}>
-                {/* <span className="user">{msg.role}:</span> */}
-                <span className="text">{msg.content}</span>
-              </div>
-            ))}
-          </div>
-          <form className="d-flex justify-content-center" id="gptForm" onSubmit={handleSendMessage}>
-            <textarea
-              className="flex-grow-1 no-resize"
-              id="gptInput"
-              name="gptInput"
-              placeholder="Type your message..."
-              rows="3"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault(); // Prevent the default newline behavior
-                  const submitButton = document.getElementById('chat-submit-button');
-                  if (submitButton) {
-                    submitButton.click(); // Trigger the submit button click
-                  }
-                }
-              }}
-              required/>
-            <button className='custom-button-invisible' type="submit" id="chat-submit-button"></button>
-          </form>
-        </div>
+            <div className="d-flex flex-column col-8 justify-content-end">
+                <div className="d-flex flex-column-reverse overflow-auto my-3" id="chat-window">
+                    {messages.filter(msg => !msg.isPrompt).map((msg, index) => (
+                        <div key={index} className={`${msg.role === 'user' ? 'custom-message-user' : 'custom-message-assistant'}`}>
+                            <span className="text" style={{ wordBreak: 'break-word' }}>{msg.content}</span>
+                        </div>
+                    ))}
+                </div>
+                <form className="d-flex justify-content-center" id="gptForm" onSubmit={handleSendMessage}>
+                    <textarea
+                        className="flex-grow-1 no-resize"
+                        id="gptInput"
+                        name="gptInput"
+                        placeholder="Type your message..."
+                        rows="3"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                            event.preventDefault(); // Prevent the default newline behavior
+                            const submitButton = document.getElementById('chat-submit-button');
+                            if (submitButton) {
+                                submitButton.click(); // Trigger the submit button click
+                            }
+                        }
+                        }}
+                        required/>
+                    <button className='custom-button-invisible' type="submit" id="chat-submit-button"></button>
+                </form>
+            </div>
 
-        <div className="d-flex flex-column col justify-content-end">
-          <div className="ps-2">
-            <button className="custom-button-invisible" onClick={() => {
-              const submitButton = document.getElementById('chat-submit-button');
-              if (submitButton) {
-                submitButton.click(); // Trigger the submit button click
-              }
-            }}>
-              <i className="bi bi-send custom-icon-normal"></i>
-            </button>
-          </div>
-        </div>
+            <div className="d-flex flex-column col justify-content-end">
+                <div className="ps-2">
+                    <button className="custom-button-invisible" onClick={() => {
+                        const submitButton = document.getElementById('chat-submit-button');
+                        if (submitButton) {
+                            submitButton.click(); // Trigger the submit button click
+                        }
+                    }}>
+                        <i className="bi bi-send custom-icon-normal"></i>
+                    </button>
+                </div>
+            </div>
 
-      </div>
+        </div>
     );
 }
