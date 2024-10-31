@@ -128,7 +128,7 @@ export function ReviewForm({ reviewData }) {
     <div className="container mt-5">
         <p className="custom-card-text-checkin">On <strong>{reviewData.date}</strong>, you stated:</p>
         <p className="custom-card-text-checkin-2">
-            <i>"{identifications[reviewData.identification]}"</i><br />
+            <i>&quot;{identifications[reviewData.identification]}&quot;</i><br />
             <button className='btn btn-secondary' type="button" data-bs-toggle="modal" data-bs-target="#messagesModal">Chat history</button>
         </p>
 
