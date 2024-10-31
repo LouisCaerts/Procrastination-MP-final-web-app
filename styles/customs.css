@@ -52,6 +52,15 @@
     border-radius: 10px;
 }
 
+.custom-button-tight {
+    min-width: 10%;
+    border: 1px solid var(--custom-black);
+    padding: 5px;
+    margin: 5px;
+    text-align: center;
+    border-radius: 10px;
+}
+
 .custom-button-small:hover {
     background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(211, 211, 211, 0.5) 30%, rgba(211, 211, 211, 0.5) 70%, rgba(255, 255, 255, 0) 100%);
 }
@@ -78,6 +87,11 @@
 
 .custom-card-text-checkin {
     font-size: clamp(20px, 1.75vw, 50px);
+    font-weight: light;
+}
+
+.custom-card-text-checkin-2 {
+    font-size: clamp(15px, 1.5vw, 45px);
     font-weight: light;
 }
 

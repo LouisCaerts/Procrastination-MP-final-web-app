@@ -6,6 +6,7 @@ import { useSession } from '@clerk/nextjs';
 import React, { useState, useEffect } from 'react';
 import { CheckinForm } from 'components/checkin-form'
 import { ReviewForm } from 'components/review-form'
+import Image from 'next/image';
 
 export function Checkin() {
     // Clerk session & supabase client
@@ -122,7 +123,7 @@ export function Checkin() {
     async function loadReviews() {
         const { data, error } = await supabaseClient
         .from('review')
-        .select('*, chat(start)')
+        .select('*, chat(start, identification)')
         .is('rating', null)
         .order('chat(start)', { ascending: true });
         if (!error) {
@@ -181,42 +182,56 @@ export function Checkin() {
                         <h2 className=''>Help us collect data to understand procrastination even better!</h2>
                         <br />
                         <br />
-                            
-                        <div>
-                            <hr className="my-4" />
-                            <h4><ins>Pending personal reflections:</ins></h4>
 
-                            <div className='d-flex flex-column'>
-                                <div className="card text-start">
-                                    <div className="card-body">
-                                        {checkins.map((checkin, index) => (
-                                            <div key={index}>
-                                                <CheckinForm checkinData={{id: checkin.id, date:formatTimestampToHumanReadable(checkin.day)}} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div>
-                            <hr className="my-4" />
-                            <h4><ins>Pending user reviews:</ins></h4>
-
+                        {checkins.length == 0 & reviews.length == 0 ? (
                             <div>
-                                <div className="card text-start">
-                                    <div className="card-body">
-                                        {reviews.map((review, index) => (
-                                            <div key={index}>
-                                                <ReviewForm reviewData={{id: review.id, date:formatTimestampToHumanReadable(review.chat.start)}} />
-                                            </div>
-                                        ))}
+                                <h5>You have filled in all surveys for now. Thank you!</h5>
+                                <h5>Please check back tomorrow night.</h5>
+                                <br />
+                                <br />
+                                <iframe src="https://giphy.com/embed/uWlpPGquhGZNFzY90z" width="480" height="350" style={{}} frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/moodman-thank-you-funny-uWlpPGquhGZNFzY90z">via GIPHY</a></p>
+                            </div>
+                        ) : (<></>)}
+                            
+                        {checkins.length > 0 ? (
+                            <div>
+                                <hr className="my-4" />
+                                <h4><ins>Pending personal reflections:</ins></h4>
+
+                                <div className='d-flex flex-column'>
+                                    <div className="card text-start">
+                                        <div className="card-body">
+                                            {checkins.map((checkin, index) => (
+                                                <div key={index}>
+                                                    <CheckinForm checkinData={{id: checkin.id, date:formatTimestampToHumanReadable(checkin.day)}} />
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                        </div>
+                            </div>
+                        ) : (<></>)}
+
+                        {reviews.length > 0 ? (
+                            <div>
+                                <hr className="my-4" />
+                                <h4><ins>Pending user reviews:</ins></h4>
+
+                                <div>
+                                    <div className="card text-start">
+                                        <div className="card-body">
+                                            {reviews.map((review, index) => (
+                                                <div key={index}>
+                                                    <ReviewForm reviewData={{id: review.id, date:formatTimestampToHumanReadable(review.chat.start), chat_id: review.chat_id, identification: review.chat.identification}} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        ) : (<></>)}
 
                     </div>
                 </div>

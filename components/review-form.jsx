@@ -19,6 +19,19 @@ export function ReviewForm({ reviewData }) {
       question1: '',
       comment: '',
   });
+  const [messages, setMessages] = useState([]);
+
+  const identifications = {
+    "AdaptEnvironment": "I get sidetracked because of my environment (e.g. text messages, background noise, clutter, ...).",
+    "ImplementationIntention": "I get distracted even when nothing is disturbing me. My mind simply wanders to other things.",
+    "GoalIntentions": "I don't know how to approach the task.",
+    "FocusOnProcess": "I get frustrated with how much work is left to do.",
+    "SelfForgiveness": "I feel guilty for procrastinating, which only makes me procrastinate more.",
+    "SelfCompassion": "I feel ashamed or overly perfectionistic while working on this, which makes it hard to even start.",
+    "PredictFutureEmotions": "I expect to strongly dislike the work ahead, which makes me put it off.",
+    "EstablishMeaning": "I am procrastinating because I don't see the point in the work.",
+    "DurationEstimation": "I am avoiding the work because I just don't feel like it right now."
+  };
     
   const handleSubmit = (event) => {
       event.preventDefault(); // Prevent page reload on form submit
@@ -27,6 +40,7 @@ export function ReviewForm({ reviewData }) {
       const form = event.target;
       const formValues = {
           question1: form.question1.value,
+          question2: form.question2.value,
           comment: form.comment.value,
       };
       uploadForm(formValues);
@@ -44,6 +58,7 @@ export function ReviewForm({ reviewData }) {
       const { data, error } = await supabaseClient.rpc('update_review', {
           p_id: reviewData.id,
           p_rating: formValues.question1,
+          p_rating_effective: formValues.question2,
           p_comment: formValues.comment
         });
       if (error) {
@@ -51,6 +66,32 @@ export function ReviewForm({ reviewData }) {
           setUploadError(true);
       } else {
           toggleVisibility();
+      }
+  }
+
+  async function loadData() {
+      console.log("Loading review...");
+
+      const { loaded_messages } =  await loadMessages(reviewData.chat_id);
+      console.log("ABCDE: ", loaded_messages)
+      setMessages(loaded_messages);
+
+      console.log("Review loaded!")
+  }
+
+  async function loadMessages(chat_id) {
+      const { data, error } = await supabaseClient
+      .from('message')
+      .select('role,content,isPrompt')
+      .eq('chat_id', chat_id)
+      .order('send_time', { ascending: true });
+      if (!error) {
+          console.log("Message entities loaded!");
+          return {loaded_messages: data};
+      } else {
+          console.error("Unable to retrieve message entities.");
+          setFatalError(true);
+          return {loaded_messages: null};
       }
   }
 
@@ -77,6 +118,7 @@ export function ReviewForm({ reviewData }) {
   useEffect(() => {
       if (databaseLoaded) {
           console.log("DATABASE LOADED FROM CHECKIN FORM")
+          loadData();
       }
   }, [databaseLoaded]);
 
@@ -84,11 +126,49 @@ export function ReviewForm({ reviewData }) {
 
   return (
     <div className="container mt-5">
-      <p className="custom-card-text-checkin">On <strong>{reviewData.date}</strong>:</p>
+        <p className="custom-card-text-checkin">On <strong>{reviewData.date}</strong>, you stated:</p>
+        <p className="custom-card-text-checkin-2">
+            <i>"{identifications[reviewData.identification]}"</i><br />
+            <button className='btn btn-secondary' type="button" data-bs-toggle="modal" data-bs-target="#messagesModal">Chat history</button>
+        </p>
+
+        <div className="modal fade" id="messagesModal" tabIndex="-1" role="dialog" aria-labelledby="messagesModalLabel" aria-hidden="true">
+            <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+                <div className="modal-content">
+                <div className="modal-header">
+                    <h5 className="modal-title" id="messagesModalLabel">Warning!</h5>
+                    <button type="button" className="close custom-button-invisible" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div className="modal-body">
+                    <div className="d-flex flex-column overflow-auto my-3" id="chat-window">
+                        {messages.filter(msg => !msg.isPrompt).map((msg, index) => (
+                            <div key={index} className={`${msg.role === 'user' ? 'custom-message-user' : 'custom-message-assistant'}`}>
+                                <span className="text" style={{ wordBreak: 'break-word' }}>{msg.content}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="modal-footer">
+                    <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+                </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+      <br />
+
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="form-label">
-            <h5>The chatbot&apos;s suggestions were effective and relevant for my concerns at the time.</h5>
+            <h5>The chatbot&apos;s suggestions felt relevant. The chatbot understood my current situation well.</h5>
           </label>
           <div className="d-flex flex-column flex-md-row justify-content-between">
             <div className="form-check">
@@ -118,6 +198,44 @@ export function ReviewForm({ reviewData }) {
             <div className="form-check">
               <input className="form-check-input" type="radio" name="question1" id="q1-option5" value="5" required />
               <label className="form-check-label" htmlFor="q1-option5">
+                Strongly Agree
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <label className="form-label">
+            <h5>The chatbot&apos;s suggestions were effective. The advice I got helped me stop procrastinating.</h5>
+          </label>
+          <div className="d-flex flex-column flex-md-row justify-content-between">
+            <div className="form-check">
+              <input className="form-check-input" type="radio" name="question2" id="q2-option1" value="1" required />
+              <label className="form-check-label" htmlFor="q2-option1">
+                Strongly Disagree
+              </label>
+            </div>
+            <div className="form-check">
+              <input className="form-check-input" type="radio" name="question2" id="q2-option2" value="2" required />
+              <label className="form-check-label" htmlFor="q2-option2">
+                Disagree
+              </label>
+            </div>
+            <div className="form-check">
+              <input className="form-check-input" type="radio" name="question2" id="q2-option3" value="3" required />
+              <label className="form-check-label" htmlFor="q2-option3">
+                Neutral
+              </label>
+            </div>
+            <div className="form-check">
+              <input className="form-check-input" type="radio" name="question2" id="q2-option4" value="4" required />
+              <label className="form-check-label" htmlFor="q2-option4">
+                Agree
+              </label>
+            </div>
+            <div className="form-check">
+              <input className="form-check-input" type="radio" name="question2" id="q2-option5" value="5" required />
+              <label className="form-check-label" htmlFor="q2-option5">
                 Strongly Agree
               </label>
             </div>

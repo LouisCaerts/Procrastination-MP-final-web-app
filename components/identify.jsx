@@ -87,7 +87,7 @@ export function Identify() {
     };
 
     const handleReturn = () => {
-        if (previousQuestion.length == 0) return;
+        if (previousQuestion.length == 0) router.push('/');
 
         setFadeOut(true);
 
@@ -243,7 +243,7 @@ export function Identify() {
 
                         <br />
 
-                        <button className="custom-button-invisible" onClick={() => handleReturn()} disabled={previousQuestion.length === 0}>
+                        <button className="custom-button-invisible" onClick={() => handleReturn()}>
                             <i className="bi bi-arrow-left" style={{ fontSize: '50px' }}></i>
                         </button>
                         
