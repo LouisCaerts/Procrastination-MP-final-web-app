@@ -169,7 +169,7 @@ export function CheckinForm({ checkinData }) {
 
                 <div className="mb-4">
                 <label className="form-label">
-                    <h5>3. I did NOT procrastinate.</h5>
+                    <h5>3. I finished my tasks for the day without procrastinating.</h5>
                 </label>
                 <div className="d-flex flex-column flex-md-row justify-content-between">
                     <div className="form-check">
