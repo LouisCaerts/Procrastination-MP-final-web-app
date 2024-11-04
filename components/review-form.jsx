@@ -130,14 +130,14 @@ export function ReviewForm({ incrementCount, reviewData }) {
         <p className="custom-card-text-checkin">On <strong>{reviewData.date}</strong>, you stated:</p>
         <p className="custom-card-text-checkin-2">
             <i>&quot;{identifications[reviewData.identification]}&quot;</i><br />
-            <button className='btn btn-secondary' type="button" data-bs-toggle="modal" data-bs-target="#messagesModal">Chat history</button>
+            <button className='btn btn-secondary' type="button" data-bs-toggle="modal" data-bs-target={"#messagesModal"+reviewData.id}>Chat history</button>
         </p>
 
-        <div className="modal fade" id="messagesModal" tabIndex="-1" role="dialog" aria-labelledby="messagesModalLabel" aria-hidden="true">
+        <div className="modal fade" id={"messagesModal"+reviewData.id} tabIndex="-1" role="dialog" aria-labelledby={"messagesModal"+reviewData.id+"Label"} aria-hidden="true">
             <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
                 <div className="modal-content">
                 <div className="modal-header">
-                    <h5 className="modal-title" id="messagesModalLabel">Chat History</h5>
+                    <h5 className="modal-title" id={"messagesModal"+reviewData.id+"Label"}>Chat History</h5>
                     <button type="button" className="close custom-button-invisible" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

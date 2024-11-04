@@ -8,8 +8,8 @@ import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 
 export const metadata = {
     title: {
-        template: '%s | Netlify',
-        default: 'Netlify Starter'
+        template: 'Concrastination',
+        default: 'Concrastination'
     }
 };
 

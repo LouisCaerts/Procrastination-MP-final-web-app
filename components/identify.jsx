@@ -148,7 +148,7 @@ export function Identify() {
             else {
                 console.log("User entity loaded!");
                 if ((usergroup == 'A' && currentdate > switchdate) || (usergroup == 'B' && currentdate <= switchdate)) {
-                    const choiceoptions = ["FocusOnProcess", "DurationEstimation", "SelfForgiveness", "SelfCompassion"];
+                    const choiceoptions = ["FocusOnProcess", "DurationEstimation", "SelfForgiveness", "SelfCompassion", "GoalIntentions"];
                     while (newresult == '' || newresult == trueresult) {
                         
                         console.log(newresult);
