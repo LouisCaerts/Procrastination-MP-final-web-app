@@ -15,6 +15,7 @@ export function Checkin() {
     const [databaseLoaded, setDatabaseLoaded] = useState(false);
     const [uploadError, setUploadError] = useState(false);
     const [fatalError, setFatalError] = useState(false);
+    const [done, setDone] = useState(false);
     // Other variables
     const [checkins, setCheckins] = useState([]);
     const [reviews, setReviews] = useState([]);
@@ -42,6 +43,18 @@ export function Checkin() {
     console.log(humanReadableDate1);
     const humanReadableDate2 = formatTimestampToHumanReadable(reviewExample.chat.start);
     console.log(humanReadableDate2);
+
+    const [count, setCount] = useState(0);
+  
+    const incrementCount = () => {
+      setCount(prevCount => prevCount + 1); // Update state to trigger re-render
+    };
+
+    useEffect(() => {
+        if (databaseLoaded) {
+            loadData();
+        }
+    }, [count]);
 
     function formatTimestampToHumanReadable(timestamp) {
         const date = new Date(timestamp);
@@ -101,6 +114,7 @@ export function Checkin() {
         }
         */
 
+        setDone(true)
         console.log("Data loaded!")
     }
 
@@ -163,6 +177,8 @@ export function Checkin() {
         }
     }, [databaseLoaded]);
 
+    if (!done) return (<div className="d-flex flex-column col-12 custom-grow justify-content-center"><div className="d-flex flex-row w-100 h-100 py-4 px-4 justify-content-center"><p>Loading...</p></div></div>);
+
     return (
         <div className="d-flex flex-column col-12 custom-grow">
 
@@ -195,7 +211,6 @@ export function Checkin() {
                             
                         {checkins.length > 0 ? (
                             <div>
-                                <hr className="my-4" />
                                 <h4><ins>Pending personal reflections:</ins></h4>
 
                                 <div className='d-flex flex-column'>
@@ -203,7 +218,7 @@ export function Checkin() {
                                         <div className="card-body">
                                             {checkins.map((checkin, index) => (
                                                 <div key={index}>
-                                                    <CheckinForm checkinData={{id: checkin.id, date:formatTimestampToHumanReadable(checkin.day)}} />
+                                                    <CheckinForm incrementCount={incrementCount} checkinData={{id: checkin.id, date:formatTimestampToHumanReadable(checkin.day)}} />
                                                 </div>
                                             ))}
                                         </div>
@@ -215,7 +230,9 @@ export function Checkin() {
 
                         {reviews.length > 0 ? (
                             <div>
-                                <hr className="my-4" />
+                                <br />
+                                <br />
+                                <br />
                                 <h4><ins>Pending user reviews:</ins></h4>
 
                                 <div>
@@ -223,7 +240,7 @@ export function Checkin() {
                                         <div className="card-body">
                                             {reviews.map((review, index) => (
                                                 <div key={index}>
-                                                    <ReviewForm reviewData={{id: review.id, date:formatTimestampToHumanReadable(review.chat.start), chat_id: review.chat_id, identification: review.chat.identification}} />
+                                                    <ReviewForm incrementCount={incrementCount} reviewData={{id: review.id, date:formatTimestampToHumanReadable(review.chat.start), chat_id: review.chat_id, identification: review.chat.identification}} />
                                                 </div>
                                             ))}
                                         </div>

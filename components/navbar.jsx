@@ -18,7 +18,7 @@ export function Navbar() {
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
 
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li className="nav-item">
+                        <li className="nav-item pt-1 pt-md-0">
                             <button className="custom-button-link">
                                 <a className={`nav-link ${router.pathName === '/' ? 'active' : 'inactive'}`} onClick={() => router.push('/')}>Home</a>
                             </button>
