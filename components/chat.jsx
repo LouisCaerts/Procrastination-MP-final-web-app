@@ -210,11 +210,12 @@ export function Chat() {
     }
 
     return (
-        <div className="d-flex flex-row w-100 py-4 px-4" suppressHydrationWarning>
-            <div className="d-flex flex-column col">
-                <div className="ps-2">
+        <div className="d-flex flex-row w-100 py-2 justify-content-center" suppressHydrationWarning>
+            
+            <div className="d-flex flex-column col-2 justify-content-left align-items-left">
+                <div className="ps-2 pt-2">
                     <button className="btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#exitModal">
-                        <i className="bi bi-stop-circle align-self-start"></i> End Conversation
+                        Stop
                     </button>
                 </div>
             </div>
@@ -229,7 +230,7 @@ export function Chat() {
                         </button>
                     </div>
                     <div className="modal-body">
-                        You are about to permanently end this conversation.
+                        You are about to end this conversation.
                     </div>
                     <div className="modal-footer">
                         <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -239,7 +240,7 @@ export function Chat() {
                 </div>
             </div>
 
-            <div className="d-flex flex-column col-8 justify-content-end">
+            <div className="d-flex flex-column col-10 col-md-8 px-1 justify-content-end">
                 <div className="d-flex flex-column-reverse overflow-auto my-3" id="chat-window">
                     {messages.filter(msg => !msg.isPrompt).map((msg, index) => (
                         <div key={index} className={`${msg.role === 'user' ? 'custom-message-user' : 'custom-message-assistant'}`}>
@@ -247,42 +248,47 @@ export function Chat() {
                         </div>
                     ))}
                 </div>
-                <form className="d-flex justify-content-center" id="gptForm" onSubmit={handleSendMessage}>
-                    <textarea
-                        className="flex-grow-1 no-resize"
-                        id="gptInput"
-                        name="gptInput"
-                        placeholder="Type your message..."
-                        rows="3"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                            event.preventDefault(); // Prevent the default newline behavior
-                            const submitButton = document.getElementById('chat-submit-button');
-                            if (submitButton) {
-                                submitButton.click(); // Trigger the submit button click
+                <div className='d-flex flex-row'>
+                    <form className="d-flex col-10 col-md-12" id="gptForm" onSubmit={handleSendMessage}>
+                        <textarea
+                            className="flex-grow-1 no-resize"
+                            id="gptInput"
+                            name="gptInput"
+                            placeholder="Type your message..."
+                            rows="3"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                                event.preventDefault(); // Prevent the default newline behavior
+                                const submitButton = document.getElementById('chat-submit-button');
+                                if (submitButton) {
+                                    submitButton.click(); // Trigger the submit button click
+                                }
                             }
-                        }
-                        }}
-                        required/>
-                    <button className='custom-button-invisible' type="submit" id="chat-submit-button"></button>
-                </form>
-            </div>
-
-            <div className="d-flex flex-column col justify-content-end">
-                <div className="ps-2">
-                    <button className="custom-button-invisible" onClick={() => {
-                        const submitButton = document.getElementById('chat-submit-button');
-                        if (submitButton) {
-                            submitButton.click(); // Trigger the submit button click
-                        }
-                    }}>
-                        <i className="bi bi-send custom-icon-normal"></i>
-                    </button>
+                            }}
+                            required/>
+                        <button className='custom-button-invisible' type="submit" id="chat-submit-button"></button>
+                    </form>
+                    <div className="d-flex col-2 col-md-1 align-items-end">
+                        <div className="ps-2">
+                            <button className="custom-button-invisible" onClick={() => {
+                                const submitButton = document.getElementById('chat-submit-button');
+                                if (submitButton) {
+                                    submitButton.click(); // Trigger the submit button click
+                                }
+                            }}>
+                                <i className="bi bi-send custom-icon-normal"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
+            
+            <div className="d-flex flex-column col-0 col-md-2 justify-content-left align-items-left">
+                <div className="ps-2">
+                </div>
+            </div>
         </div>
     );
 }

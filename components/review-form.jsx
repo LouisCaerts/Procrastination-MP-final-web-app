@@ -5,7 +5,7 @@ import { useSession } from '@clerk/nextjs';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export function ReviewForm({ reviewData }) {
+export function ReviewForm({ incrementCount, reviewData }) {
 
   // Clerk session & supabase client
   const { session, isLoaded } = useSession();
@@ -45,6 +45,7 @@ export function ReviewForm({ reviewData }) {
       };
       uploadForm(formValues);
 
+      incrementCount();
       console.log("Form submitted with values: ", formValues);
   };
 
@@ -136,7 +137,7 @@ export function ReviewForm({ reviewData }) {
             <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
                 <div className="modal-content">
                 <div className="modal-header">
-                    <h5 className="modal-title" id="messagesModalLabel">Warning!</h5>
+                    <h5 className="modal-title" id="messagesModalLabel">Chat History</h5>
                     <button type="button" className="close custom-button-invisible" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -168,36 +169,36 @@ export function ReviewForm({ reviewData }) {
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="form-label">
-            <h5>The chatbot&apos;s suggestions felt relevant. The chatbot understood my current situation well.</h5>
+            <h5>The chatbot&apos;s suggestions felt <u>relevant</u>. (The chatbot understood my current situation well.)</h5>
           </label>
           <div className="d-flex flex-column flex-md-row justify-content-between">
             <div className="form-check">
-              <input className="form-check-input" type="radio" name="question1" id="q1-option1" value="1" required />
-              <label className="form-check-label" htmlFor="q1-option1">
+              <input className="form-check-input" type="radio" name="question1" id={"q1-option1"+"review"+reviewData.id} value="1" required />
+              <label className="form-check-label" htmlFor={"q1-option1"+"review"+reviewData.id}>
                 Strongly Disagree
               </label>
             </div>
             <div className="form-check">
-              <input className="form-check-input" type="radio" name="question1" id="q1-option2" value="2" required />
-              <label className="form-check-label" htmlFor="q1-option2">
+              <input className="form-check-input" type="radio" name="question1" id={"q1-option2"+"review"+reviewData.id} value="2" required />
+              <label className="form-check-label" htmlFor={"q1-option2"+"review"+reviewData.id}>
                 Disagree
               </label>
             </div>
             <div className="form-check">
-              <input className="form-check-input" type="radio" name="question1" id="q1-option3" value="3" required />
-              <label className="form-check-label" htmlFor="q1-option3">
+              <input className="form-check-input" type="radio" name="question1" id={"q1-option3"+"review"+reviewData.id} value="3" required />
+              <label className="form-check-label" htmlFor={"q1-option3"+"review"+reviewData.id}>
                 Neutral
               </label>
             </div>
             <div className="form-check">
-              <input className="form-check-input" type="radio" name="question1" id="q1-option4" value="4" required />
-              <label className="form-check-label" htmlFor="q1-option4">
+              <input className="form-check-input" type="radio" name="question1" id={"q1-option4"+"review"+reviewData.id} value="4" required />
+              <label className="form-check-label" htmlFor={"q1-option4"+"review"+reviewData.id}>
                 Agree
               </label>
             </div>
             <div className="form-check">
-              <input className="form-check-input" type="radio" name="question1" id="q1-option5" value="5" required />
-              <label className="form-check-label" htmlFor="q1-option5">
+              <input className="form-check-input" type="radio" name="question1" id={"q1-option5"+"review"+reviewData.id} value="5" required />
+              <label className="form-check-label" htmlFor={"q1-option5"+"review"+reviewData.id}>
                 Strongly Agree
               </label>
             </div>
@@ -206,36 +207,36 @@ export function ReviewForm({ reviewData }) {
 
         <div className="mb-4">
           <label className="form-label">
-            <h5>The chatbot&apos;s suggestions were effective. The advice I got helped me stop procrastinating.</h5>
+            <h5>The chatbot&apos;s suggestions were <u>effective</u>. (The advice I got helped me stop procrastinating.)</h5>
           </label>
           <div className="d-flex flex-column flex-md-row justify-content-between">
             <div className="form-check">
-              <input className="form-check-input" type="radio" name="question2" id="q2-option1" value="1" required />
-              <label className="form-check-label" htmlFor="q2-option1">
+              <input className="form-check-input" type="radio" name="question2" id={"q2-option1"+"review"+reviewData.id} value="1" required />
+              <label className="form-check-label" htmlFor={"q2-option1"+"review"+reviewData.id}>
                 Strongly Disagree
               </label>
             </div>
             <div className="form-check">
-              <input className="form-check-input" type="radio" name="question2" id="q2-option2" value="2" required />
-              <label className="form-check-label" htmlFor="q2-option2">
+              <input className="form-check-input" type="radio" name="question2" id={"q2-option2"+"review"+reviewData.id} value="2" required />
+              <label className="form-check-label" htmlFor={"q2-option2"+"review"+reviewData.id}>
                 Disagree
               </label>
             </div>
             <div className="form-check">
-              <input className="form-check-input" type="radio" name="question2" id="q2-option3" value="3" required />
-              <label className="form-check-label" htmlFor="q2-option3">
+              <input className="form-check-input" type="radio" name="question2" id={"q2-option3"+"review"+reviewData.id} value="3" required />
+              <label className="form-check-label" htmlFor={"q2-option3"+"review"+reviewData.id}>
                 Neutral
               </label>
             </div>
             <div className="form-check">
-              <input className="form-check-input" type="radio" name="question2" id="q2-option4" value="4" required />
-              <label className="form-check-label" htmlFor="q2-option4">
+              <input className="form-check-input" type="radio" name="question2" id={"q2-option4"+"review"+reviewData.id} value="4" required />
+              <label className="form-check-label" htmlFor={"q2-option4"+"review"+reviewData.id}>
                 Agree
               </label>
             </div>
             <div className="form-check">
-              <input className="form-check-input" type="radio" name="question2" id="q2-option5" value="5" required />
-              <label className="form-check-label" htmlFor="q2-option5">
+              <input className="form-check-input" type="radio" name="question2" id={"q2-option5"+"review"+reviewData.id} value="5" required />
+              <label className="form-check-label" htmlFor={"q2-option5"+"review"+reviewData.id}>
                 Strongly Agree
               </label>
             </div>
@@ -250,6 +251,7 @@ export function ReviewForm({ reviewData }) {
 
         <button type="submit" className="btn btn-primary">Submit</button>
       </form>
+      <hr className="my-4" />
     </div>
   );
 }

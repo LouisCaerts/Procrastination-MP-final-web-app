@@ -5,7 +5,7 @@ import { useSession } from '@clerk/nextjs';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export function CheckinForm({ checkinData }) {
+export function CheckinForm({ incrementCount, checkinData }) {
     // Clerk session & supabase client
     const { session, isLoaded } = useSession();
     const [supabaseClient, setSupabaseClient] = useState(null);
@@ -39,6 +39,7 @@ export function CheckinForm({ checkinData }) {
         };
         uploadForm(formValues);
 
+        incrementCount();
         console.log("Form submitted with values: ", formValues);
     };
 
@@ -97,32 +98,32 @@ export function CheckinForm({ checkinData }) {
                 </label>
                 <div className="d-flex flex-column flex-md-row justify-content-between">
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question1" id="q1-option1" value="1" required />
-                    <label className="form-check-label" htmlFor="q1-option1">
+                    <input className="form-check-input" type="radio" name="question1" id={"q1-option1"+"checkin"+checkinData.id} value="1" required />
+                    <label className="form-check-label" htmlFor={"q1-option1"+"checkin"+checkinData.id}>
                         Strongly Disagree
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question1" id="q1-option2" value="2" required />
-                    <label className="form-check-label" htmlFor="q1-option2">
+                    <input className="form-check-input" type="radio" name="question1" id={"q1-option2"+"checkin"+checkinData.id} value="2" required />
+                    <label className="form-check-label" htmlFor={"q1-option2"+"checkin"+checkinData.id}>
                         Disagree
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question1" id="q1-option3" value="3" required />
-                    <label className="form-check-label" htmlFor="q1-option3">
+                    <input className="form-check-input" type="radio" name="question1" id={"q1-option3"+"checkin"+checkinData.id} value="3" required />
+                    <label className="form-check-label" htmlFor={"q1-option3"+"checkin"+checkinData.id}>
                         Neutral
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question1" id="q1-option4" value="4" required />
-                    <label className="form-check-label" htmlFor="q1-option4">
+                    <input className="form-check-input" type="radio" name="question1" id={"q1-option4"+"checkin"+checkinData.id} value="4" required />
+                    <label className="form-check-label" htmlFor={"q1-option4"+"checkin"+checkinData.id}>
                         Agree
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question1" id="q1-option5" value="5" required />
-                    <label className="form-check-label" htmlFor="q1-option5">
+                    <input className="form-check-input" type="radio" name="question1" id={"q1-option5"+"checkin"+checkinData.id} value="5" required />
+                    <label className="form-check-label" htmlFor={"q1-option5"+"checkin"+checkinData.id}>
                         Strongly Agree
                     </label>
                     </div>
@@ -135,32 +136,32 @@ export function CheckinForm({ checkinData }) {
                 </label>
                 <div className="d-flex flex-column flex-md-row justify-content-between">
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question2" id="q2-option1" value="1" required />
-                    <label className="form-check-label" htmlFor="q2-option1">
+                    <input className="form-check-input" type="radio" name="question2" id={"q2-option1"+"checkin"+checkinData.id} value="1" required />
+                    <label className="form-check-label" htmlFor={"q2-option1"+"checkin"+checkinData.id}>
                         Strongly Disagree
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question2" id="q2-option2" value="2" required />
-                    <label className="form-check-label" htmlFor="q2-option2">
+                    <input className="form-check-input" type="radio" name="question2" id={"q2-option2"+"checkin"+checkinData.id} value="2" required />
+                    <label className="form-check-label" htmlFor={"q2-option2"+"checkin"+checkinData.id}>
                         Disagree
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question2" id="q2-option3" value="3" required />
-                    <label className="form-check-label" htmlFor="q2-option3">
+                    <input className="form-check-input" type="radio" name="question2" id={"q2-option3"+"checkin"+checkinData.id} value="3" required />
+                    <label className="form-check-label" htmlFor={"q2-option3"+"checkin"+checkinData.id}>
                         Neutral
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question2" id="q2-option4" value="4" required />
-                    <label className="form-check-label" htmlFor="q2-option4">
+                    <input className="form-check-input" type="radio" name="question2" id={"q2-option4"+"checkin"+checkinData.id} value="4" required />
+                    <label className="form-check-label" htmlFor={"q2-option4"+"checkin"+checkinData.id}>
                         Agree
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question2" id="q2-option5" value="5" required />
-                    <label className="form-check-label" htmlFor="q2-option5">
+                    <input className="form-check-input" type="radio" name="question2" id={"q2-option5"+"checkin"+checkinData.id} value="5" required />
+                    <label className="form-check-label" htmlFor={"q2-option5"+"checkin"+checkinData.id}>
                         Strongly Agree
                     </label>
                     </div>
@@ -173,32 +174,32 @@ export function CheckinForm({ checkinData }) {
                 </label>
                 <div className="d-flex flex-column flex-md-row justify-content-between">
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question3" id="q3-option1" value="1" required />
-                    <label className="form-check-label" htmlFor="q3-option1">
+                    <input className="form-check-input" type="radio" name="question3" id={"q3-option1"+"checkin"+checkinData.id} value="1" required />
+                    <label className="form-check-label" htmlFor={"q3-option1"+"checkin"+checkinData.id}>
                         Strongly Disagree
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question3" id="q3-option2" value="2" required />
-                    <label className="form-check-label" htmlFor="q3-option2">
+                    <input className="form-check-input" type="radio" name="question3" id={"q3-option2"+"checkin"+checkinData.id} value="2" required />
+                    <label className="form-check-label" htmlFor={"q3-option2"+"checkin"+checkinData.id}>
                         Disagree
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question3" id="q3-option3" value="3" required />
-                    <label className="form-check-label" htmlFor="q3-option3">
+                    <input className="form-check-input" type="radio" name="question3" id={"q3-option3"+"checkin"+checkinData.id} value="3" required />
+                    <label className="form-check-label" htmlFor={"q3-option3"+"checkin"+checkinData.id}>
                         Neutral
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question3" id="q3-option4" value="4" required />
-                    <label className="form-check-label" htmlFor="q3-option4">
+                    <input className="form-check-input" type="radio" name="question3" id={"q3-option4"+"checkin"+checkinData.id} value="4" required />
+                    <label className="form-check-label" htmlFor={"q3-option4"+"checkin"+checkinData.id}>
                         Agree
                     </label>
                     </div>
                     <div className="form-check">
-                    <input className="form-check-input" type="radio" name="question3" id="q3-option5" value="5" required />
-                    <label className="form-check-label" htmlFor="q3-option5">
+                    <input className="form-check-input" type="radio" name="question3" id={"q3-option5"+"checkin"+checkinData.id} value="5" required />
+                    <label className="form-check-label" htmlFor={"q3-option5"+"checkin"+checkinData.id}>
                         Strongly Agree
                     </label>
                     </div>

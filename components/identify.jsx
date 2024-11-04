@@ -222,7 +222,7 @@ export function Identify() {
     }
 
     return (
-        <div className="d-flex flex-row w-100 h-100 custom-grow py-4 px-4 justify-content-center">
+        <div className="d-flex flex-row w-100 h-100 custom-grow py-2 px-2 justify-content-center">
 
             <div className="d-flex flex-column col-8 justify-content-center text-center">
 
@@ -235,7 +235,7 @@ export function Identify() {
 
                         <div className="d-flex flex-column">
                             {questions[currentQuestion].answers.map((answer, index) => (
-                                <button className="custom-button-small px-5" key={index} onClick={() => handleAnswerSelect(answer.nextQuestion, answer.finalAnswer)}>
+                                <button className="custom-button-small px-1" key={index} onClick={() => handleAnswerSelect(answer.nextQuestion, answer.finalAnswer)}>
                                 {answer.text}
                                 </button>
                             ))}
